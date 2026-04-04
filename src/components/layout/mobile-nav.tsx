@@ -40,29 +40,29 @@ export default function MobileNav() {
       {/* Sources sub-navigation bar */}
       {sourcesActive && (
         <div className="lg:hidden fixed bottom-[52px] left-0 right-0 z-40 border-t border-gray-200 dark:border-neutral-800 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm">
-          <div className="flex items-center justify-center gap-1 px-4 py-1.5">
+          <div className="flex items-center gap-2 px-4 py-2 mb-4">
             <Link
               href="/search"
               className={cn(
-                "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
                 pathname.startsWith("/search")
                   ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
-                  : "text-gray-500 dark:text-neutral-400"
+                  : "text-gray-500 dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-900"
               )}
             >
-              <Search size={14} />
+              <Search size={15} />
               Search
             </Link>
             <Link
               href="/sources"
               className={cn(
-                "flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-xs font-medium transition-colors cursor-pointer",
+                "flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-colors cursor-pointer",
                 pathname === "/sources"
                   ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
-                  : "text-gray-500 dark:text-neutral-400"
+                  : "text-gray-500 dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-900"
               )}
             >
-              <Library size={14} />
+              <Library size={15} />
               My Sources
             </Link>
           </div>

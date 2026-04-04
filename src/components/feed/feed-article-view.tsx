@@ -6,9 +6,9 @@ import { formatDate, stripHtml, truncate } from "@/lib/utils";
 import BookmarkButton from "./bookmark-button";
 import ShareButtons from "./share-buttons";
 import useFeedStore from "@/stores/feed-store";
-import useSettingsStore from "@/stores/settings-store";
 import { Inbox } from "lucide-react";
 import { Shimmer } from "@/components/ui/skeleton";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 interface FeedArticleViewProps {
   items: FeedItem[];
@@ -47,7 +47,6 @@ export default function FeedArticleView({
 function ArticleItem({ item }: { item: FeedItem }) {
   const router = useRouter();
   const setSelectedArticle = useFeedStore((s) => s.setSelectedArticle);
-  const readingFontSize = useSettingsStore((s) => s.readingFontSize);
   const description = stripHtml(item.description || item.content);
 
   function handleClick() {
@@ -83,22 +82,18 @@ function ArticleItem({ item }: { item: FeedItem }) {
       <div onClick={handleClick} className="cursor-pointer mt-4">
         {item.imageUrl && (
           <div className="w-full max-w-md rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800 mb-4">
-            <img
+            <OptimizedImage
               src={item.imageUrl}
-              alt=""
+              width={448}
+              height={252}
+              sizes="(max-width: 448px) 100vw, 448px"
               className="w-full object-cover"
-              loading="lazy"
-              onError={(e) => {
-                (e.target as HTMLImageElement).parentElement!.style.display = "none";
-              }}
+              hideContainerOnError
             />
           </div>
         )}
         {description && (
-          <p
-            className="text-gray-600 dark:text-neutral-300 leading-relaxed"
-            style={{ fontSize: `${readingFontSize}px` }}
-          >
+          <p className="text-gray-600 dark:text-neutral-300 leading-relaxed" style={{ fontSize: "1em" }}>
             {truncate(description, 600)}
           </p>
         )}

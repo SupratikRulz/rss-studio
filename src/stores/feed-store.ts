@@ -3,6 +3,9 @@ import { persist } from "zustand/middleware";
 import type { FeedSource, Folder, FeedItem } from "@/lib/types";
 import { DEFAULT_FOLDER_ID, DEFAULT_FOLDER_NAME } from "@/lib/constants";
 import { generateId } from "@/lib/utils";
+import useToastStore from "./toast-store";
+
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
 
 interface FeedState {
   sources: FeedSource[];
@@ -16,6 +19,11 @@ interface FeedState {
   isLoadingExplore: boolean;
   isLoadingSourceFeed: boolean;
 
+  _feedsFetchedAt: number;
+  _exploreFetchedAt: number;
+  _sourceFeedFetchedAt: Record<string, number>;
+  _sourceFeedCache: Record<string, FeedItem[]>;
+
   addSource: (source: Omit<FeedSource, "id" | "addedAt">) => FeedSource | null;
   removeSource: (sourceId: string) => void;
   moveSourceToFolder: (sourceId: string, folderId: string) => void;
@@ -26,9 +34,9 @@ interface FeedState {
   setExploreFeedItems: (items: FeedItem[]) => void;
   setSelectedArticle: (article: FeedItem | null) => void;
   setSelectedSourceId: (sourceId: string | null) => void;
-  fetchSubscribedFeeds: () => Promise<void>;
-  fetchExploreFeeds: () => Promise<void>;
-  fetchSourceFeed: (sourceId: string) => Promise<void>;
+  fetchSubscribedFeeds: (force?: boolean) => Promise<void>;
+  fetchExploreFeeds: (force?: boolean) => Promise<void>;
+  fetchSourceFeed: (sourceId: string, force?: boolean) => Promise<void>;
 }
 
 const useFeedStore = create<FeedState>()(
@@ -51,6 +59,11 @@ const useFeedStore = create<FeedState>()(
       isLoadingExplore: false,
       isLoadingSourceFeed: false,
 
+      _feedsFetchedAt: 0,
+      _exploreFetchedAt: 0,
+      _sourceFeedFetchedAt: {},
+      _sourceFeedCache: {},
+
       addSource: (sourceData) => {
         const normalizedUrl = sourceData.url.trim().toLowerCase().replace(/\/+$/, "");
         const exists = get().sources.some(
@@ -63,13 +76,14 @@ const useFeedStore = create<FeedState>()(
           id: generateId(),
           addedAt: new Date().toISOString(),
         };
-        set((state) => ({ sources: [...state.sources, source] }));
+        set((state) => ({ sources: [...state.sources, source], _feedsFetchedAt: 0 }));
         return source;
       },
 
       removeSource: (sourceId) => {
         set((state) => ({
           sources: state.sources.filter((s) => s.id !== sourceId),
+          _feedsFetchedAt: 0,
         }));
       },
 
@@ -118,20 +132,35 @@ const useFeedStore = create<FeedState>()(
       setFeedItems: (items) => set({ feedItems: items }),
       setExploreFeedItems: (items) => set({ exploreFeedItems: items }),
       setSelectedArticle: (article) => set({ selectedArticle: article }),
-      setSelectedSourceId: (sourceId) =>
-        set({ selectedSourceId: sourceId, sourceFeedItems: [] }),
+      setSelectedSourceId: (sourceId) => {
+        const cached = sourceId ? get()._sourceFeedCache[sourceId] : undefined;
+        set({
+          selectedSourceId: sourceId,
+          sourceFeedItems: cached || [],
+        });
+      },
 
-      fetchSubscribedFeeds: async () => {
-        const { sources } = get();
-        if (sources.length === 0) {
+      fetchSubscribedFeeds: async (force = false) => {
+        const state = get();
+        if (state.isLoadingFeeds) return;
+
+        if (state.sources.length === 0) {
           set({ feedItems: [], isLoadingFeeds: false });
+          return;
+        }
+
+        if (
+          !force &&
+          state.feedItems.length > 0 &&
+          Date.now() - state._feedsFetchedAt < CACHE_TTL
+        ) {
           return;
         }
 
         set({ isLoadingFeeds: true });
         try {
           const results = await Promise.allSettled(
-            sources.map(async (source) => {
+            state.sources.map(async (source) => {
               const res = await fetch("/api/rss/parse", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -158,27 +187,66 @@ const useFeedStore = create<FeedState>()(
               new Date(b.pubDate).getTime() - new Date(a.pubDate).getTime()
           );
 
-          set({ feedItems: allItems, isLoadingFeeds: false });
+          set({
+            feedItems: allItems,
+            isLoadingFeeds: false,
+            _feedsFetchedAt: Date.now(),
+          });
+
+          const failedCount = results.filter((r) => r.status === "rejected").length;
+          if (failedCount > 0 && failedCount === state.sources.length) {
+            useToastStore.getState().addToast("Failed to load your feeds. Check your connection and try again.");
+          } else if (failedCount > 0) {
+            useToastStore.getState().addToast(`Some feeds couldn't be loaded (${failedCount} of ${state.sources.length}).`);
+          }
         } catch {
           set({ isLoadingFeeds: false });
+          useToastStore.getState().addToast("Failed to load your feeds. Check your connection and try again.");
         }
       },
 
-      fetchExploreFeeds: async () => {
+      fetchExploreFeeds: async (force = false) => {
+        const state = get();
+        if (state.isLoadingExplore) return;
+
+        if (
+          !force &&
+          state.exploreFeedItems.length > 0 &&
+          Date.now() - state._exploreFetchedAt < CACHE_TTL
+        ) {
+          return;
+        }
+
         set({ isLoadingExplore: true });
         try {
           const res = await fetch("/api/rss/explore");
           if (!res.ok) throw new Error("Failed to fetch explore feeds");
           const data = await res.json();
-          set({ exploreFeedItems: data.items || [], isLoadingExplore: false });
+          set({
+            exploreFeedItems: data.items || [],
+            isLoadingExplore: false,
+            _exploreFetchedAt: Date.now(),
+          });
         } catch {
           set({ isLoadingExplore: false });
+          useToastStore.getState().addToast("Explore feeds couldn't be loaded. Check your connection and try again.");
         }
       },
 
-      fetchSourceFeed: async (sourceId) => {
-        const source = get().sources.find((s) => s.id === sourceId);
+      fetchSourceFeed: async (sourceId, force = false) => {
+        const state = get();
+        const source = state.sources.find((s) => s.id === sourceId);
         if (!source) return;
+        if (state.isLoadingSourceFeed && state.selectedSourceId === sourceId) return;
+
+        const lastFetched = state._sourceFeedFetchedAt[sourceId] || 0;
+        const cached = state._sourceFeedCache[sourceId];
+        const isFresh = cached && cached.length > 0 && Date.now() - lastFetched < CACHE_TTL;
+
+        if (!force && isFresh) {
+          set({ selectedSourceId: sourceId, sourceFeedItems: cached });
+          return;
+        }
 
         set({ isLoadingSourceFeed: true, selectedSourceId: sourceId });
         try {
@@ -189,6 +257,7 @@ const useFeedStore = create<FeedState>()(
           });
           if (!res.ok) {
             set({ isLoadingSourceFeed: false });
+            useToastStore.getState().addToast(`Failed to load "${source.title}". The feed may be temporarily unavailable.`);
             return;
           }
           const data = await res.json();
@@ -196,9 +265,21 @@ const useFeedStore = create<FeedState>()(
             ...item,
             sourceId: source.id,
           }));
-          set({ sourceFeedItems: items, isLoadingSourceFeed: false });
+          set((prev) => ({
+            sourceFeedItems: items,
+            isLoadingSourceFeed: false,
+            _sourceFeedFetchedAt: {
+              ...prev._sourceFeedFetchedAt,
+              [sourceId]: Date.now(),
+            },
+            _sourceFeedCache: {
+              ...prev._sourceFeedCache,
+              [sourceId]: items,
+            },
+          }));
         } catch {
           set({ isLoadingSourceFeed: false });
+          useToastStore.getState().addToast(`Failed to load "${source.title}". Check your connection and try again.`);
         }
       },
     }),

@@ -8,7 +8,9 @@ import {
   Rss,
   FolderInput,
   ChevronDown,
+  RefreshCw,
 } from "lucide-react";
+import { cn } from "@/lib/utils";
 import useFeedStore from "@/stores/feed-store";
 import Dialog, { ConfirmDialog } from "@/components/ui/dialog";
 import FeedTree from "@/components/feeds/feed-tree";
@@ -132,24 +134,36 @@ export default function FeedsPage() {
                 {selectedSource?.title || "Feed"}
               </h1>
             </div>
-            {selectedSource && (
-              <div className="relative shrink-0">
-                <select
-                  value={selectedSource.folderId}
-                  onChange={(e) =>
-                    moveSourceToFolder(selectedSource.id, e.target.value)
-                  }
-                  className="min-w-20 appearance-none rounded-lg border border-gray-200 dark:border-neutral-700 pl-2 pr-7 py-1.5 text-xs font-medium text-gray-600 dark:text-neutral-300 bg-white dark:bg-neutral-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-400"
+            <div className="flex items-center gap-1 shrink-0">
+              {selectedSourceId && (
+                <button
+                  onClick={() => fetchSourceFeed(selectedSourceId, true)}
+                  disabled={isLoadingSourceFeed}
+                  title="Refresh feed"
+                  className="rounded-lg p-2 text-gray-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-600 dark:hover:text-neutral-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
                 >
-                  {folders.map((f) => (
-                    <option key={f.id} value={f.id}>
-                      {f.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500" />
-              </div>
-            )}
+                  <RefreshCw size={15} strokeWidth={2} className={cn(isLoadingSourceFeed && "animate-spin")} />
+                </button>
+              )}
+              {selectedSource && (
+                <div className="relative">
+                  <select
+                    value={selectedSource.folderId}
+                    onChange={(e) =>
+                      moveSourceToFolder(selectedSource.id, e.target.value)
+                    }
+                    className="min-w-20 appearance-none rounded-lg border border-gray-200 dark:border-neutral-700 pl-2 pr-7 py-1.5 text-xs font-medium text-gray-600 dark:text-neutral-300 bg-white dark:bg-neutral-800 cursor-pointer focus:outline-none focus:ring-1 focus:ring-emerald-400"
+                  >
+                    {folders.map((f) => (
+                      <option key={f.id} value={f.id}>
+                        {f.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={12} className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500" />
+                </div>
+              )}
+            </div>
           </div>
         </header>
 
@@ -184,6 +198,14 @@ export default function FeedsPage() {
             )}
             {selectedSource ? (
               <div className="flex items-center gap-2 shrink-0">
+                <button
+                  onClick={() => fetchSourceFeed(selectedSource.id, true)}
+                  disabled={isLoadingSourceFeed}
+                  title="Refresh feed"
+                  className="rounded-lg p-2 text-gray-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-600 dark:hover:text-neutral-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+                >
+                  <RefreshCw size={16} strokeWidth={2} className={cn(isLoadingSourceFeed && "animate-spin")} />
+                </button>
                 <FolderInput size={15} className="text-gray-400 dark:text-neutral-500" />
                 <div className="relative">
                   <select

@@ -5,6 +5,7 @@ import type { FeedItem } from "@/lib/types";
 import { formatDate, truncate, stripHtml } from "@/lib/utils";
 import BookmarkButton from "./bookmark-button";
 import useFeedStore from "@/stores/feed-store";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 interface FeedCardProps {
   item: FeedItem;
@@ -27,15 +28,13 @@ export default function FeedCard({ item }: FeedCardProps) {
       className="group flex gap-4 p-4 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-neutral-800"
     >
       {item.imageUrl && (
-        <div className="hidden sm:block flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800">
-          <img
+        <div className="hidden sm:block flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800 relative">
+          <OptimizedImage
             src={item.imageUrl}
-            alt=""
-            className="w-full h-full object-cover"
-            loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).style.display = "none";
-            }}
+            fill
+            sizes="112px"
+            className="object-cover"
+            hideContainerOnError
           />
         </div>
       )}

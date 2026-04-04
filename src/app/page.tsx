@@ -4,9 +4,9 @@ import { useEffect, useState, useMemo } from "react";
 import Tabs from "@/components/ui/tabs";
 import FeedList from "@/components/feed/feed-list";
 import useFeedStore from "@/stores/feed-store";
-import { Rss } from "lucide-react";
+import { Rss, RefreshCw } from "lucide-react";
 import AddFeedDialog from "@/components/sources/add-feed-dialog";
-import { isToday } from "@/lib/utils";
+import { isToday, cn } from "@/lib/utils";
 
 const TABS = [
   { id: "me", label: "Me" },
@@ -32,10 +32,10 @@ export default function TodayPage() {
   }, [fetchSubscribedFeeds, sources.length]);
 
   useEffect(() => {
-    if (activeTab === "explore" && exploreFeedItems.length === 0) {
+    if (activeTab === "explore") {
       fetchExploreFeeds();
     }
-  }, [activeTab, exploreFeedItems.length, fetchExploreFeeds]);
+  }, [activeTab, fetchExploreFeeds]);
 
   const todayFeedItems = useMemo(
     () => feedItems.filter((item) => isToday(item.pubDate)),
@@ -47,11 +47,35 @@ export default function TodayPage() {
     [exploreFeedItems]
   );
 
+  function handleReload() {
+    if (activeTab === "me") {
+      fetchSubscribedFeeds(true);
+    } else {
+      fetchExploreFeeds(true);
+    }
+  }
+
+  const isLoading = activeTab === "me" ? isLoadingFeeds : isLoadingExplore;
+
   return (
     <div className="max-w-3xl mx-auto">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 pt-5 pb-0">
-          <h1 className="text-xl font-semibold text-gray-900 dark:text-neutral-100 mb-4">Today</h1>
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-xl font-semibold text-gray-900 dark:text-neutral-100">Today</h1>
+            <button
+              onClick={handleReload}
+              disabled={isLoading}
+              title="Refresh feeds"
+              className="rounded-lg p-2 text-gray-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-600 dark:hover:text-neutral-300 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition-colors"
+            >
+              <RefreshCw
+                size={17}
+                strokeWidth={2}
+                className={cn(isLoading && "animate-spin")}
+              />
+            </button>
+          </div>
           <Tabs tabs={TABS} activeTab={activeTab} onChange={setActiveTab} />
         </div>
       </header>

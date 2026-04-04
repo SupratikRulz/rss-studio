@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import useFeedStore from "@/stores/feed-store";
+import useToastStore from "@/stores/toast-store";
 import {
   DISCOVER_SECTIONS,
   searchDiscoverSources,
@@ -145,6 +146,7 @@ export default function SearchPage() {
           setSubscribingUrl(null);
           return;
         }
+        useToastStore.getState().addToast(`"${added.title}" added to My Sources.`, "success");
       } else {
         const added = addSource({
           title: pendingFollow.title,
@@ -160,6 +162,7 @@ export default function SearchPage() {
           setSubscribingUrl(null);
           return;
         }
+        useToastStore.getState().addToast("Subscribed, but we couldn't verify the feed right now.", "info");
       }
     } catch {
       const added = addSource({
@@ -176,6 +179,7 @@ export default function SearchPage() {
         setSubscribingUrl(null);
         return;
       }
+      useToastStore.getState().addToast("Subscribed, but we couldn't verify the feed right now.", "info");
     }
 
     setSubscribingUrl(null);
@@ -253,9 +257,11 @@ export default function SearchPage() {
         if (res.ok) {
           const data = await res.json();
           setSearchResult(data);
+        } else {
+          useToastStore.getState().addToast("No RSS feed found at this URL. Check the link and try again.");
         }
       } catch {
-        /* ignore */
+        useToastStore.getState().addToast("Search failed. Check your connection and try again.");
       }
       setIsSearching(false);
     }
@@ -264,7 +270,7 @@ export default function SearchPage() {
   // Category detail view
   if (selectedCategory) {
     return (
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto pb-12 lg:pb-0">
         <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
           <div className="px-4 sm:px-6 py-4 flex items-center gap-3">
             <button
@@ -361,7 +367,7 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto pb-12 lg:pb-0">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-4">
           <form onSubmit={handleSearch} className="relative">

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Rss } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -19,21 +20,32 @@ function getDomain(url: string): string {
   }
 }
 
+function getFaviconUrls(domain: string, size: number): string[] {
+  if (!domain) return [];
+  const hiRes = Math.max(size * 3, 128);
+  return [
+    `https://icon.horse/icon/${domain}`,
+    `https://www.google.com/s2/favicons?domain=${domain}&sz=${hiRes}`,
+    `https://icons.duckduckgo.com/ip3/${domain}.ico`,
+  ];
+}
+
 export default function SourceIcon({
   siteUrl,
   imageUrl,
   size = 16,
   className,
 }: SourceIconProps) {
-  const [failed, setFailed] = useState(false);
+  const [srcIndex, setSrcIndex] = useState(0);
   const [useFallback, setUseFallback] = useState(false);
+  const [failed, setFailed] = useState(false);
 
   const domain = getDomain(siteUrl);
-  const faviconUrl = domain
-    ? `https://www.google.com/s2/favicons?domain=${domain}&sz=${Math.max(size * 2, 32)}`
-    : "";
+  const faviconUrls = getFaviconUrls(domain, size);
 
-  const src = !imageUrl || useFallback ? faviconUrl : imageUrl;
+  const primarySrc = !imageUrl || useFallback ? null : imageUrl;
+  const currentFaviconSrc = faviconUrls[srcIndex] || null;
+  const src = primarySrc || currentFaviconSrc;
 
   if (failed || !src) {
     return (
@@ -50,15 +62,20 @@ export default function SourceIcon({
   }
 
   return (
-    <img
+    <Image
       src={src}
       alt=""
+      width={size}
+      height={size}
       className={cn("rounded object-contain shrink-0 border bg-white", className)}
-      style={{ width: size, height: size }}
       loading="lazy"
+      fetchPriority="low"
+      unoptimized
       onError={() => {
-        if (!useFallback && imageUrl) {
+        if (primarySrc) {
           setUseFallback(true);
+        } else if (srcIndex < faviconUrls.length - 1) {
+          setSrcIndex((i) => i + 1);
         } else {
           setFailed(true);
         }

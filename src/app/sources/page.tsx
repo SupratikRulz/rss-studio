@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 import { Plus, Rss, Trash2, ExternalLink, Search, X } from "lucide-react";
 import useFeedStore from "@/stores/feed-store";
+import useToastStore from "@/stores/toast-store";
 import AddFeedDialog from "@/components/sources/add-feed-dialog";
 import { ConfirmDialog } from "@/components/ui/dialog";
 import SourceIcon from "@/components/ui/source-icon";
@@ -26,7 +27,7 @@ export default function SourcesPage() {
   }, [sources, searchQuery]);
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto pb-12 lg:pb-0">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-5 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-neutral-100">
@@ -156,7 +157,11 @@ export default function SourcesPage() {
         open={deleteTarget !== null}
         onClose={() => setDeleteTarget(null)}
         onConfirm={() => {
-          if (deleteTarget) removeSource(deleteTarget);
+          if (deleteTarget) {
+            const source = sources.find((s) => s.id === deleteTarget);
+            removeSource(deleteTarget);
+            useToastStore.getState().addToast(`"${source?.title || "Source"}" removed.`, "success");
+          }
           setDeleteTarget(null);
         }}
         title="Remove Source"

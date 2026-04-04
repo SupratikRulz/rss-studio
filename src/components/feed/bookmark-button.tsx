@@ -2,6 +2,7 @@
 
 import { Bookmark } from "lucide-react";
 import useBookmarkStore from "@/stores/bookmark-store";
+import useToastStore from "@/stores/toast-store";
 import type { FeedItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -25,9 +26,13 @@ export default function BookmarkButton({
     e.stopPropagation();
     if (bookmarked) {
       const bookmark = getBookmarkByLink(item.link);
-      if (bookmark) removeBookmark(bookmark.id);
+      if (bookmark) {
+        removeBookmark(bookmark.id);
+        useToastStore.getState().addToast("Bookmark removed.", "success");
+      }
     } else {
       addBookmark(item);
+      useToastStore.getState().addToast("Article bookmarked.", "success");
     }
   }
 

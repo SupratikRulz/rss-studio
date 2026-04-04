@@ -2,6 +2,7 @@
 
 import Sidebar from "./sidebar";
 import MobileNav from "./mobile-nav";
+import ToastContainer from "@/components/ui/toast";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
@@ -9,6 +10,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <Sidebar />
       <main className="flex-1 min-w-0 pb-20 lg:pb-0">{children}</main>
       <MobileNav />
+      <ToastContainer />
     </div>
   );
 }

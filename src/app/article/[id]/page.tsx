@@ -3,15 +3,14 @@
 import { useRouter } from "next/navigation";
 import { ArrowLeft, ExternalLink } from "lucide-react";
 import useFeedStore from "@/stores/feed-store";
-import useSettingsStore from "@/stores/settings-store";
 import BookmarkButton from "@/components/feed/bookmark-button";
+import OptimizedImage from "@/components/ui/optimized-image";
 import ShareButtons from "@/components/feed/share-buttons";
 import { formatDate } from "@/lib/utils";
 
 export default function ArticlePage() {
   const router = useRouter();
   const selectedArticle = useFeedStore((s) => s.selectedArticle);
-  const readingFontSize = useSettingsStore((s) => s.readingFontSize);
 
   if (!selectedArticle) {
     return (
@@ -81,13 +80,15 @@ export default function ArticlePage() {
 
         {article.imageUrl && (
           <div className="mb-6 rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800">
-            <img
+            <OptimizedImage
               src={article.imageUrl}
-              alt=""
+              width={768}
+              height={384}
+              sizes="(max-width: 768px) 100vw, 768px"
               className="w-full h-auto max-h-96 object-cover"
-              onError={(e) => {
-                (e.target as HTMLImageElement).style.display = "none";
-              }}
+              priority
+              quality={85}
+              hideContainerOnError
             />
           </div>
         )}
@@ -100,7 +101,6 @@ export default function ArticlePage() {
             prose-img:rounded-xl prose-img:my-4
             prose-strong:text-gray-800
             prose-blockquote:border-emerald-200 prose-blockquote:text-gray-500"
-          style={{ fontSize: `${readingFontSize}px` }}
           dangerouslySetInnerHTML={{
             __html: article.content || article.description || "",
           }}

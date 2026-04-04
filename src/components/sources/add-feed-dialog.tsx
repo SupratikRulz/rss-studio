@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import Dialog from "@/components/ui/dialog";
 import useFeedStore from "@/stores/feed-store";
+import useToastStore from "@/stores/toast-store";
 import { addFeedInputSchema, addFolderInputSchema } from "@/lib/schemas";
 
 interface AddFeedDialogProps {
@@ -74,8 +75,10 @@ export default function AddFeedDialog({ open, onClose }: AddFeedDialogProps) {
       });
 
       if (!res.ok) {
-        const data = await res.json();
-        setError(data.error || "Failed to parse feed");
+        const data = await res.json().catch(() => ({}));
+        const msg = data.error || "Failed to parse feed. Check the URL and try again.";
+        setError(msg);
+        useToastStore.getState().addToast(msg);
         setIsLoading(false);
         return;
       }
@@ -97,9 +100,11 @@ export default function AddFeedDialog({ open, onClose }: AddFeedDialogProps) {
         return;
       }
 
+      useToastStore.getState().addToast(`"${source.title}" added to My Sources.`, "success");
       handleClose();
     } catch {
       setError("Failed to add feed. Please check the URL and try again.");
+      useToastStore.getState().addToast("Failed to add RSS feed. Check the URL and try again.");
       setIsLoading(false);
     }
   }

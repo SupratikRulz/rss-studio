@@ -7,6 +7,7 @@ import BookmarkButton from "./bookmark-button";
 import useFeedStore from "@/stores/feed-store";
 import { Inbox } from "lucide-react";
 import { Shimmer } from "@/components/ui/skeleton";
+import OptimizedImage from "@/components/ui/optimized-image";
 
 interface FeedCardViewProps {
   items: FeedItem[];
@@ -58,15 +59,13 @@ function CardItem({ item }: { item: FeedItem }) {
       className="group flex flex-col rounded-xl overflow-hidden cursor-pointer border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-all hover:shadow-sm"
     >
       {item.imageUrl && (
-        <div className="w-full aspect-16/10 bg-gray-100 dark:bg-neutral-800 overflow-hidden">
-          <img
+        <div className="w-full aspect-16/10 bg-gray-100 dark:bg-neutral-800 overflow-hidden relative">
+          <OptimizedImage
             src={item.imageUrl}
-            alt=""
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-            loading="lazy"
-            onError={(e) => {
-              (e.target as HTMLImageElement).parentElement!.style.display = "none";
-            }}
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            hideContainerOnError
           />
         </div>
       )}
