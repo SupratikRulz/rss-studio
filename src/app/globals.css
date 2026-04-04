@@ -134,6 +134,51 @@ body {
   100% { transform: scale(1); }
 }
 
+/* View Transitions — article page shared-element morphs */
+::view-transition-group(article-title) {
+  animation-duration: 1000ms;
+  animation-timing-function: var(--ease-out-quint);
+}
+
+::view-transition-group(article-image) {
+  animation-duration: 1000ms;
+  animation-timing-function: var(--ease-out-quint);
+  overflow: hidden;
+  border-radius: 0.75rem;
+}
+
+::view-transition-old(article-title),
+::view-transition-new(article-title) {
+  animation-duration: 700ms;
+  animation-timing-function: var(--ease-out-cubic);
+  height: 100%;
+  overflow: hidden;
+}
+
+::view-transition-old(article-image),
+::view-transition-new(article-image) {
+  animation-duration: 800ms;
+  animation-timing-function: var(--ease-out-cubic);
+  object-fit: cover;
+}
+
+/* Default page cross-fade during view transitions */
+::view-transition-old(root) {
+  animation: vt-fade-out 500ms var(--ease-out-cubic);
+}
+
+::view-transition-new(root) {
+  animation: vt-fade-in 700ms var(--ease-out-cubic);
+}
+
+@keyframes vt-fade-out {
+  to { opacity: 0; }
+}
+
+@keyframes vt-fade-in {
+  from { opacity: 0; }
+}
+
 /* Reduced motion: disable all custom animations */
 @media (prefers-reduced-motion: reduce) {
   .animate-in,
@@ -147,6 +192,11 @@ body {
   }
   .press-scale:active {
     transform: none;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
   }
 }
 

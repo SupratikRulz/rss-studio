@@ -29,7 +29,7 @@ export default function ArticlePage() {
   const article = selectedArticle;
 
   return (
-    <div className="max-w-3xl mx-auto animate-page">
+    <div className="max-w-3xl mx-auto">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
           <button
@@ -73,13 +73,16 @@ export default function ArticlePage() {
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-neutral-100 leading-tight">
+          <h1
+            className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-neutral-100 leading-tight"
+            style={{ viewTransitionName: "article-title" }}
+          >
             {article.title}
           </h1>
         </div>
 
         {article.imageUrl && (
-          <div className="mb-6 rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800">
+          <div className="mb-6 rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800" style={{ viewTransitionName: "article-image" }}>
             <OptimizedImage
               src={article.imageUrl}
               width={768}

@@ -1,10 +1,9 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { FeedItem } from "@/lib/types";
 import { formatDate, stripHtml, truncate } from "@/lib/utils";
 import BookmarkButton from "./bookmark-button";
-import useFeedStore from "@/stores/feed-store";
+import useArticleTransition from "@/hooks/use-article-transition";
 import { Inbox } from "lucide-react";
 import { Shimmer } from "@/components/ui/skeleton";
 import OptimizedImage from "@/components/ui/optimized-image";
@@ -50,22 +49,16 @@ export default function FeedCardView({
 }
 
 function CardItem({ item }: { item: FeedItem }) {
-  const router = useRouter();
-  const setSelectedArticle = useFeedStore((s) => s.setSelectedArticle);
+  const { navigate, titleRef, imageRef } = useArticleTransition();
   const description = stripHtml(item.description || item.content);
-
-  function handleClick() {
-    setSelectedArticle(item);
-    router.push(`/article/${encodeURIComponent(item.id)}`);
-  }
 
   return (
     <article
-      onClick={handleClick}
+      onClick={() => navigate(item)}
       className="group flex flex-col rounded-xl overflow-hidden cursor-pointer border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5"
     >
       {item.imageUrl && (
-        <div className="w-full aspect-16/10 bg-gray-100 dark:bg-neutral-800 overflow-hidden relative">
+        <div ref={imageRef as React.Ref<HTMLDivElement>} className="w-full aspect-16/10 bg-gray-100 dark:bg-neutral-800 overflow-hidden relative">
           <OptimizedImage
             src={item.imageUrl}
             fill
@@ -76,7 +69,7 @@ function CardItem({ item }: { item: FeedItem }) {
         </div>
       )}
       <div className="flex flex-col flex-1 p-4">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-neutral-100 leading-snug line-clamp-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+        <h3 ref={titleRef as React.Ref<HTMLHeadingElement>} className="text-sm font-semibold text-gray-900 dark:text-neutral-100 leading-snug line-clamp-2 group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
           {item.title}
         </h3>
         <div className="flex items-center gap-1.5 mt-2">

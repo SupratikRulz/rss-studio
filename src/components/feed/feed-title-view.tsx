@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { FeedItem } from "@/lib/types";
 import { formatDate, stripHtml, truncate } from "@/lib/utils";
 import BookmarkButton from "./bookmark-button";
 import ShareButtons from "./share-buttons";
-import useFeedStore from "@/stores/feed-store";
+import useArticleTransition from "@/hooks/use-article-transition";
 import { Inbox } from "lucide-react";
 import { Shimmer } from "@/components/ui/skeleton";
 
@@ -50,27 +49,21 @@ export default function FeedTitleView({
 }
 
 function TitleItem({ item }: { item: FeedItem }) {
-  const router = useRouter();
-  const setSelectedArticle = useFeedStore((s) => s.setSelectedArticle);
+  const { navigate, titleRef } = useArticleTransition();
   const description = stripHtml(item.description || item.content);
-
-  function handleClick() {
-    setSelectedArticle(item);
-    router.push(`/article/${encodeURIComponent(item.id)}`);
-  }
 
   return (
     <div className="flex items-center gap-3 py-2.5 px-2 group hover:bg-gray-50 dark:hover:bg-neutral-900 rounded-lg transition-colors">
       <BookmarkButton item={item} size={15} className="shrink-0" />
 
       <div
-        onClick={handleClick}
+        onClick={() => navigate(item)}
         className="flex-1 min-w-0 flex items-center gap-2 cursor-pointer"
       >
         <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 shrink-0 w-20 truncate">
           {item.sourceName}
         </span>
-        <span className="text-sm font-medium text-gray-900 dark:text-neutral-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+        <span ref={titleRef as React.Ref<HTMLSpanElement>} className="text-sm font-medium text-gray-900 dark:text-neutral-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
           {item.title}
         </span>
         {description && (

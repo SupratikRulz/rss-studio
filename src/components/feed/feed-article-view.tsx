@@ -1,11 +1,10 @@
 "use client";
 
-import { useRouter } from "next/navigation";
 import type { FeedItem } from "@/lib/types";
 import { formatDate, stripHtml, truncate } from "@/lib/utils";
 import BookmarkButton from "./bookmark-button";
 import ShareButtons from "./share-buttons";
-import useFeedStore from "@/stores/feed-store";
+import useArticleTransition from "@/hooks/use-article-transition";
 import { Inbox } from "lucide-react";
 import { Shimmer } from "@/components/ui/skeleton";
 import OptimizedImage from "@/components/ui/optimized-image";
@@ -51,19 +50,13 @@ export default function FeedArticleView({
 }
 
 function ArticleItem({ item }: { item: FeedItem }) {
-  const router = useRouter();
-  const setSelectedArticle = useFeedStore((s) => s.setSelectedArticle);
+  const { navigate, titleRef, imageRef } = useArticleTransition();
   const description = stripHtml(item.description || item.content);
-
-  function handleClick() {
-    setSelectedArticle(item);
-    router.push(`/article/${encodeURIComponent(item.id)}`);
-  }
 
   return (
     <article className="py-6 px-2">
-      <div onClick={handleClick} className="cursor-pointer group">
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-neutral-100 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
+      <div onClick={() => navigate(item)} className="cursor-pointer group">
+        <h2 ref={titleRef as React.Ref<HTMLHeadingElement>} className="text-lg font-semibold text-gray-900 dark:text-neutral-100 leading-snug group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
           {item.title}
         </h2>
         <div className="flex items-center gap-2 mt-2 text-xs text-gray-400 dark:text-neutral-500">
@@ -85,9 +78,9 @@ function ArticleItem({ item }: { item: FeedItem }) {
         <BookmarkButton item={item} size={17} />
       </div>
 
-      <div onClick={handleClick} className="cursor-pointer mt-4">
+      <div onClick={() => navigate(item)} className="cursor-pointer mt-4">
         {item.imageUrl && (
-          <div className="w-full max-w-md rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800 mb-4">
+          <div ref={imageRef as React.Ref<HTMLDivElement>} className="w-full max-w-md rounded-xl overflow-hidden bg-gray-100 dark:bg-neutral-800 mb-4">
             <OptimizedImage
               src={item.imageUrl}
               width={448}
@@ -105,7 +98,7 @@ function ArticleItem({ item }: { item: FeedItem }) {
         )}
       </div>
 
-      <div onClick={handleClick} className="cursor-pointer mt-4">
+      <div onClick={() => navigate(item)} className="cursor-pointer mt-4">
         <span className="text-sm font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
           Visit Website
         </span>
