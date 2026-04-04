@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import ThemeProvider from "@/components/layout/theme-provider";
+import { seoConfig } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,8 +16,27 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RSS Studio",
-  description: "A clean, minimal RSS reader for staying informed",
+  metadataBase: new URL(seoConfig.siteUrl),
+  applicationName: seoConfig.siteName,
+  title: {
+    default: seoConfig.defaultTitle,
+    template: `%s | ${seoConfig.siteName}`,
+  },
+  description: seoConfig.defaultDescription,
+  keywords: seoConfig.defaultKeywords,
+  category: "technology",
+  openGraph: {
+    title: seoConfig.defaultTitle,
+    description: seoConfig.defaultDescription,
+    siteName: seoConfig.siteName,
+    type: "website",
+    url: seoConfig.siteUrl,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: seoConfig.defaultTitle,
+    description: seoConfig.defaultDescription,
+  },
 };
 
 const clerkAppearance = {

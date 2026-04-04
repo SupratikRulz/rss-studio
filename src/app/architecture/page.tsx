@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
+import { createPageMetadata } from "@/lib/seo";
 
-export const metadata: Metadata = {
-  title: "Architecture | RSS Studio",
-  description: "Architecture overview for RSS Studio",
-};
+export const metadata: Metadata = createPageMetadata({
+  title: "Architecture",
+  description:
+    "Explore how RSS Studio is built, from routing and state management to feed APIs, persistence, and the flows behind discovery and reading.",
+  path: "/architecture",
+});
 
 const folderStructureSections = [
   {

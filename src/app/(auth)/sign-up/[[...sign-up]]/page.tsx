@@ -1,5 +1,15 @@
+import type { Metadata } from "next";
 import { SignUp } from "@clerk/nextjs";
 import { Rss } from "lucide-react";
+import { createPageMetadata } from "@/lib/seo";
+
+export const metadata: Metadata = createPageMetadata({
+  title: "Sign Up",
+  description:
+    "Create your RSS Studio account to build a calmer reading habit, organize favorite sources, and save stories worth revisiting.",
+  path: "/sign-up",
+  noIndex: true,
+});
 
 export default function SignUpPage() {
   return (
