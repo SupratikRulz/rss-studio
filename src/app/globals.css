@@ -30,6 +30,195 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* ── Clerk component overrides ── */
+
+/* Font: force Geist on every Clerk surface */
+.cl-rootBox,
+.cl-rootBox * {
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif !important;
+}
+
+/* Root box: full width on mobile */
+.cl-rootBox {
+  width: 100% !important;
+  max-width: 25rem !important;
+}
+@media (max-width: 480px) {
+  .cl-rootBox {
+    max-width: 100% !important;
+  }
+  .cl-card {
+    border-radius: 0 !important;
+    border-left: none !important;
+    border-right: none !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Card */
+.cl-card {
+  width: 100% !important;
+  border-radius: 0.75rem !important;
+  box-shadow:
+    0 4px 6px -1px rgb(0 0 0 / 0.07),
+    0 2px 4px -2px rgb(0 0 0 / 0.05) !important;
+  border: 1px solid #f3f4f6 !important;
+}
+.cl-cardBox {
+ width: 100% !important;
+}
+
+.cl-rootBox {
+  width: 100% !important;
+  display: flex !important;
+  justify-content: center !important;
+  align-items: center !important;
+}
+
+/* Primary button (Continue, Sign in, etc.) */
+.cl-formButtonPrimary {
+  border-radius: 0.5rem !important;
+  background: #059669 !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+  height: 2.5rem !important;
+  transition: background-color 150ms ease !important;
+}
+.cl-formButtonPrimary:hover {
+  background: #047857 !important;
+}
+.cl-formButtonPrimary svg.cl-buttonArrowIcon {
+  display: none !important;
+}
+
+/* Social / OAuth buttons */
+.cl-socialButtonsBlockButton {
+  border-radius: 0.5rem !important;
+  border: 1px solid #e5e7eb !important;
+  height: 2.5rem !important;
+  box-shadow: none !important;
+  transition: background-color 150ms ease !important;
+}
+.cl-socialButtonsBlockButton:hover {
+  background-color: #f9fafb !important;
+}
+.cl-socialButtonsBlockButtonText {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+/* Inputs */
+.cl-formFieldInput {
+  border-radius: 0.5rem !important;
+  border: 1px solid #e5e7eb !important;
+  height: 2.5rem !important;
+  font-size: 0.875rem !important;
+  box-shadow: none !important;
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease !important;
+}
+.cl-formFieldInput:focus {
+  border-color: #059669 !important;
+  box-shadow: 0 0 0 3px rgb(5 150 105 / 0.15) !important;
+}
+
+/* Labels */
+.cl-formFieldLabel {
+  font-size: 0.875rem !important;
+  font-weight: 500 !important;
+}
+
+/* Header */
+.cl-headerTitle {
+  font-size: 1.25rem !important;
+  font-weight: 600 !important;
+}
+.cl-headerSubtitle {
+  font-size: 0.875rem !important;
+}
+
+/* Divider */
+.cl-dividerLine {
+  background-color: #e5e7eb !important;
+}
+.cl-dividerText {
+  font-size: 0.75rem !important;
+  color: #9ca3af !important;
+}
+
+/* Links */
+.cl-footerActionLink {
+  color: #059669 !important;
+  font-weight: 500 !important;
+  font-size: 0.875rem !important;
+}
+.cl-footerActionLink:hover {
+  color: #047857 !important;
+}
+.cl-formFieldAction {
+  color: #059669 !important;
+}
+.cl-formFieldAction:hover {
+  color: #047857 !important;
+}
+.cl-identityPreviewEditButton {
+  color: #059669 !important;
+}
+
+/* Badge */
+.cl-badge {
+  border-radius: 0.375rem !important;
+  font-size: 0.75rem !important;
+  font-weight: 500 !important;
+}
+
+/* OTP input */
+.cl-otpCodeFieldInput {
+  border-radius: 0.5rem !important;
+}
+
+/* Footer branding */
+.cl-footer {
+  font-size: 0.875rem !important;
+}
+
+/* Dark mode overrides */
+[data-theme="dark"] .cl-card {
+  border-color: #262626 !important;
+}
+[data-theme="dark"] .cl-socialButtonsBlockButton {
+  border-color: #404040 !important;
+}
+[data-theme="dark"] .cl-socialButtonsBlockButton:hover {
+  background-color: #262626 !important;
+}
+[data-theme="dark"] .cl-formFieldInput {
+  border-color: #404040 !important;
+}
+[data-theme="dark"] .cl-dividerLine {
+  background-color: #404040 !important;
+}
+[data-theme="dark"] .cl-dividerText {
+  color: #737373 !important;
+}
+[data-theme="dark"] .cl-footerActionLink {
+  color: #34d399 !important;
+}
+[data-theme="dark"] .cl-footerActionLink:hover {
+  color: #6ee7b7 !important;
+}
+[data-theme="dark"] .cl-formFieldAction {
+  color: #34d399 !important;
+}
+[data-theme="dark"] .cl-identityPreviewEditButton {
+  color: #34d399 !important;
+}
+
+/* ── End Clerk overrides ── */
+
 /* Dialog / modal entrance */
 .animate-in {
   animation: animate-in 200ms var(--ease-out-quint);
