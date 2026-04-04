@@ -11,9 +11,13 @@ export const metadata: Metadata = createPageMetadata({
 const folderStructureSections = [
   {
     title: "App Router",
-    description: "Routing is split by public docs, auth, protected app pages, and internal RSS endpoints.",
+    description:
+      "Routing is split between metadata and public docs, Clerk auth screens, the protected app shell, and internal RSS endpoints.",
     tree: `src/app
 ├─ layout.tsx
+├─ globals.css
+├─ robots.ts
+├─ llms.txt/route.ts
 ├─ architecture/page.tsx
 ├─ (auth)/
 │  ├─ layout.tsx
@@ -34,8 +38,9 @@ const folderStructureSections = [
    └─ explore/route.ts`,
   },
   {
-    title: "UI Components",
-    description: "The UI layer is grouped by feature area and shell primitives instead of a single generic components bucket.",
+    title: "Feature UI",
+    description:
+      "UI code is organized by shell primitives, reusable feed views, and page-specific component groups instead of a single flat components folder.",
     tree: `src/components
 ├─ layout/
 │  ├─ app-shell.tsx
@@ -43,6 +48,13 @@ const folderStructureSections = [
 │  ├─ mobile-nav.tsx
 │  ├─ theme-provider.tsx
 │  └─ auth-sync.tsx
+├─ pages/
+│  ├─ today/
+│  ├─ search/
+│  ├─ feeds/
+│  ├─ sources/
+│  ├─ settings/
+│  └─ article/
 ├─ feed/
 │  ├─ feed-list.tsx
 │  ├─ feed-card.tsx
@@ -51,9 +63,12 @@ const folderStructureSections = [
 │  ├─ feed-title-view.tsx
 │  ├─ bookmark-button.tsx
 │  └─ share-buttons.tsx
+├─ feeds/
+│  └─ feed-tree.tsx
 ├─ sources/
 │  └─ add-feed-dialog.tsx
 └─ ui/
+   ├─ native-select.tsx
    ├─ tabs.tsx
    ├─ dialog.tsx
    ├─ toast.tsx
@@ -62,7 +77,8 @@ const folderStructureSections = [
   },
   {
     title: "State And Domain",
-    description: "State, helpers, and type definitions are isolated so business logic stays out of the page files.",
+    description:
+      "Business rules live in stores, page hooks, and lib helpers so route files stay thin and mostly compose feature clients.",
     tree: `src
 ├─ stores/
 │  ├─ feed-store.ts
@@ -70,14 +86,21 @@ const folderStructureSections = [
 │  ├─ settings-store.ts
 │  └─ toast-store.ts
 ├─ hooks/
+│  ├─ pages/
+│  │  ├─ article/
+│  │  ├─ feeds/
+│  │  ├─ search/
+│  │  └─ today/
 │  └─ use-article-transition.ts
 ├─ lib/
-│  ├─ types.ts
 │  ├─ constants.ts
+│  ├─ discover-sources.ts
 │  ├─ schemas.ts
+│  ├─ seo.ts
+│  ├─ types.ts
 │  ├─ utils.ts
 │  ├─ user-storage.ts
-│  └─ discover-sources.ts
+│  └─ ...
 └─ proxy.ts`,
   },
 ];
@@ -85,23 +108,27 @@ const folderStructureSections = [
 const stateStores = [
   {
     name: "feed-store",
-    owns: "sources, folders, feedItems, exploreFeedItems, selectedArticle, source feed cache",
-    behavior: "Persists user data and caches feed fetches for 5 minutes before refreshing",
+    owns: "sources, folders, Today feed items, Explore feed items, selected source, selected article, source cache",
+    behavior:
+      "Persists subscriptions, folders, and the selected article while keeping 5-minute feed caches and loading flags in memory.",
   },
   {
     name: "bookmark-store",
     owns: "bookmarks keyed by generated ids",
-    behavior: "Persists bookmarks per user and prevents duplicate saves by article link",
+    behavior:
+      "Persists article snapshots per user and prevents duplicate saves by article link.",
   },
   {
     name: "settings-store",
     owns: "theme, readingFontSize, feedView",
-    behavior: "Persists reading preferences per user and clamps font size to safe bounds",
+    behavior:
+      "Persists reading preferences per user, supports light/dark/system themes, and clamps font size between 12 and 48.",
   },
   {
     name: "toast-store",
     owns: "temporary notifications",
-    behavior: "Creates short-lived status and error messages for failed feed operations",
+    behavior:
+      "Lives only in memory and auto-dismisses short-lived status or error messages after 4.5 seconds.",
   },
 ];
 
@@ -191,9 +218,9 @@ const storageExamples = [
       "User presentation preferences such as theme, reading font size, and preferred feed layout.",
     sample: `{
   "state": {
-    "theme": "light",
+    "theme": "system",
     "readingFontSize": 16,
-    "feedView": "magazine"
+    "feedView": "cards"
   },
   "version": 0
 }`,
@@ -221,37 +248,37 @@ const featureFlows = [
   {
     title: "1. App bootstrap and protection",
     steps: [
-      "Clerk middleware protects every route except `/sign-in`, `/sign-up`, and `/architecture`.",
+      "`src/proxy.ts` allows `/sign-in`, `/sign-up`, and `/architecture`, then protects everything else with Clerk.",
       "Root layout mounts `ClerkProvider` and `ThemeProvider` for all routes.",
       "Protected pages enter `src/app/(app)/layout.tsx`, which renders `AuthSync` and `AppShell`.",
-      "Auth sync migrates old local storage keys, sets the current user id, then rehydrates Zustand stores.",
+      "`AuthSync` migrates old storage keys, sets the current user id, then rehydrates feed, bookmark, and settings stores.",
     ],
   },
   {
     title: "2. Today and Explore feeds",
     steps: [
-      "Home page reads the selected tab from the URL so navigation state survives article back navigation.",
-      "The `me` tab pulls subscribed source urls from `feed-store` and calls `POST /api/rss/parse` for each source.",
-      "The `explore` tab calls `GET /api/rss/explore`, which aggregates curated public feeds from constants.",
-      "Responses are normalized to `FeedItem[]`, sorted by publish date and cached in Zustand.",
+      "The Today page reads the selected tab from the URL via `useTodayTab`, so navigation survives article back navigation.",
+      "The `me` tab loads subscribed sources from `feed-store` and calls `POST /api/rss/parse` for each one.",
+      "The `explore` tab lazily calls `GET /api/rss/explore`, which aggregates curated feeds from `constants.ts`.",
+      "Both flows end in shared `FeedList` rendering, with fresh results written back into `feed-store`.",
     ],
   },
   {
     title: "3. Search and subscribe flow",
     steps: [
       "Search page sends a query to `POST /api/rss/search`.",
-      "If the query looks like a URL, the API tries the url directly, then common feed paths, then parses recent items.",
-      "If the query is keyword-based, the API searches the curated discovery catalog.",
-      "Adding a source updates `feed-store`, invalidates the subscribed feed cache and shows the new source in the shell.",
+      "If the query looks like a URL, the API tries that URL directly, then probes common feed paths on the same origin.",
+      "If the query is keyword-based, the API searches the curated discovery catalog in `discover-sources.ts`.",
+      "Adding a source updates `feed-store`, resets feed freshness, and makes the source available in the shell and feeds views.",
     ],
   },
   {
     title: "4. Source and article reading flow",
     steps: [
-      "Selecting a source in navigation triggers `fetchSourceFeed(sourceId)` in `feed-store`.",
+      "Selecting a source in navigation pushes to `/feeds?source=...` and triggers `fetchSourceFeed(sourceId)` in `feed-store`.",
       "That request reuses a per-source cache when still fresh, otherwise re-fetches through `/api/rss/parse`.",
       "Selecting an article stores it in `selectedArticle` and navigates to `/article/[id]`.",
-      "Article page reads the stored item, renders the content, and allows sharing or bookmarking.",
+      "Article page reads the stored item, renders the content, and falls back to an article-not-found screen if the state was lost on refresh.",
     ],
   },
   {
@@ -259,7 +286,7 @@ const featureFlows = [
     steps: [
       "Bookmark actions call `bookmark-store`, which saves or removes entries in user-scoped storage.",
       "Settings page updates theme, font size and feed view through `settings-store`.",
-      "Feed list components branch on `feedView` to render magazine, card, article or title-only layouts.",
+      "Feed list components branch on `feedView` to render `magazine`, `cards`, `article`, or `titleOnly` layouts.",
       "Toast messages surface partial feed failures without blocking the rest of the app.",
     ],
   },
@@ -269,66 +296,70 @@ const flowcharts = [
   {
     title: "Access and hydration flowchart",
     accent: "green",
-    lead: ["User requests route", "Clerk middleware checks route"],
+    lead: ["User requests route", "`proxy.ts` checks the public matcher"],
     decision: "Public route?",
-    yes: ["Render route directly"],
+    yes: ["Render auth page or architecture page"],
     no: [
-      "Protect route with auth",
-      "Mount RootLayout + ClerkProvider",
-      "Mount AuthSync in app layout",
+      "Protect route with Clerk",
+      "Mount RootLayout + ThemeProvider",
+      "Mount AuthSync + AppShell",
       "Set current user id and rehydrate stores",
     ],
-    merge: "Route resolves to a public page or a hydrated app shell",
+    merge: "Route resolves to a public page or a hydrated product shell",
   },
   {
     title: "Today and Explore feed flowchart",
     accent: "blue",
-    lead: ["Open home page", "Read `tab` from URL"],
-    decision: "Tab is `me` or `explore`?",
-    yes: ["Load subscribed sources", "Call `/api/rss/parse` per source"],
-    no: ["Call `/api/rss/explore`"],
-    merge: "Normalize, sort, cache in `feed-store`, then render the feed list",
+    lead: ["Open `/` Today page", "Read `tab` from URL state"],
+    decision: "Tab is `me`?",
+    yes: ["Read subscribed sources", "Call `/api/rss/parse` per source"],
+    no: ["Call `/api/rss/explore`", "Merge curated Explore items"],
+    merge: "Store fresh results in `feed-store` and render `FeedList`",
   },
   {
     title: "Search and subscription flowchart",
     accent: "purple",
     lead: ["User enters query", "POST `/api/rss/search`"],
     decision: "Looks like a URL?",
-    yes: ["Try direct url + common feed paths", "Return feed match + preview items"],
-    no: ["Search curated discovery catalog", "Return matching categories"],
-    merge: "User adds source to `feed-store`, cache invalidates, shell and feeds refresh",
+    yes: ["Try the URL directly", "Probe common feed paths and return a feed preview"],
+    no: ["Search `discover-sources.ts` catalog", "Return matching categories and sources"],
+    merge: "User adds the source to `feed-store`, freshness resets, shell and feeds refresh",
   },
   {
     title: "Reading and bookmarking flowchart",
     accent: "amber",
-    lead: ["Select source or article"],
+    lead: ["Choose a source or article", "Update route or selected state"],
     decision: "Source selected?",
-    yes: ["Use source cache if fresh", "Fetch source via `/api/rss/parse` when stale"],
-    no: ["Store article in `selectedArticle`", "Navigate to `/article/[id]`"],
+    yes: ["Open `/feeds?source=...`", "Use source cache or refetch via `/api/rss/parse`"],
+    no: ["Store item in `selectedArticle`", "Navigate to `/article/[id]`"],
     merge: "Reading screen opens and bookmark actions persist through `bookmark-store`",
   },
 ];
 
 const architectureLayers = [
   {
-    label: "Presentation",
-    detail: "Next.js app routes, AppShell, layout primitives, feed views, dialogs, settings screens",
+    label: "Request guard",
+    detail: "Next.js proxy matcher and Clerk route protection determine whether a request is public or must enter the signed-in shell.",
   },
   {
-    label: "Interaction",
-    detail: "Tabs, sidebar routing, article transitions, bookmarking, source management, search UX",
+    label: "Presentation",
+    detail: "Next.js app routes, page clients, AppShell, feed views, dialogs, and settings screens shape the reading experience.",
+  },
+  {
+    label: "Feature logic",
+    detail: "Page hooks, route search params, feed tree interactions, discovery UX, and article transitions coordinate product behavior.",
   },
   {
     label: "State",
-    detail: "Zustand stores with persistence, cache timestamps, selected entities and UI preferences",
+    detail: "Zustand stores manage persisted user data, selected entities, and short-lived feed caches or notifications.",
   },
   {
     label: "Server",
-    detail: "RSS search, parse and explore route handlers normalize remote feed data into app models",
+    detail: "RSS search, parse, and explore route handlers fetch and normalize remote feed data into app models.",
   },
   {
     label: "External systems",
-    detail: "Clerk auth, localStorage per user, public RSS feeds, proxy fallbacks for blocked feeds",
+    detail: "Clerk auth, user-scoped localStorage, curated discovery catalogs, remote RSS feeds, and proxy fallbacks support the app.",
   },
 ];
 
@@ -1063,28 +1094,29 @@ export default function ArchitecturePage() {
           <div className="eyebrow">Public architecture route</div>
           <h1>RSS Studio architecture map</h1>
           <p>
-            This page documents how RSS Studio is organized end to end: public
-            and protected routes, application shell, Zustand state, server-side
-            RSS parsing, persistence strategy, and the main feature flows that
-            drive reading, discovery, subscriptions, and bookmarks.
+            This page documents how RSS Studio is organized end to end:
+            metadata and public routes, Clerk-protected product pages, the
+            shared app shell, page-level hooks, Zustand state, RSS APIs,
+            persistence strategy, and the feature flows behind reading,
+            discovery, subscriptions, and bookmarks.
           </p>
 
           <div className="meta-grid">
             <div className="meta-chip">
               <strong>Framework</strong>
-              <span>Next.js App Router with route groups for auth and app pages.</span>
+              <span>Next.js 16 App Router with route groups for auth and app pages.</span>
             </div>
             <div className="meta-chip">
               <strong>State</strong>
-              <span>Zustand stores with persisted per-user browser storage.</span>
+              <span>Zustand stores with per-user persistence and short-lived in-memory caches.</span>
             </div>
             <div className="meta-chip">
               <strong>Auth</strong>
-              <span>Clerk protects the app shell and syncs state hydration after login.</span>
+              <span>`proxy.ts` and Clerk protect the app shell and trigger store hydration after login.</span>
             </div>
             <div className="meta-chip">
               <strong>Data</strong>
-              <span>RSS APIs normalize external feeds into a consistent app model.</span>
+              <span>RSS APIs normalize external feeds with discovery catalogs and proxy fallbacks.</span>
             </div>
           </div>
         </section>
@@ -1092,9 +1124,9 @@ export default function ArchitecturePage() {
         <section className="panel">
           <h2>System layers</h2>
           <p>
-            The architecture is intentionally thin: UI routes render the shell,
-            interactions delegate to stores, stores call internal APIs, and APIs
-            fetch and normalize external RSS feeds.
+            The architecture is intentionally thin: request protection happens
+            first, routes render the shell, feature hooks and stores coordinate
+            behavior, and RSS endpoints fetch or normalize remote feeds.
           </p>
 
           <div className="layer-grid">
@@ -1109,24 +1141,24 @@ export default function ArchitecturePage() {
 
           <div className="diagram-strip">
             <div className="diagram-node">
-              <strong>Route request</strong>
-              <span>`/`, `/search`, `/feeds`, `/bookmarks`, `/settings`, `/architecture`</span>
+              <strong>Route surfaces</strong>
+              <span>`/`, `/search`, `/sources`, `/feeds`, `/bookmarks`, `/settings`, `/architecture`, `/llms.txt`</span>
+            </div>
+            <div className="diagram-node">
+              <strong>Request guard</strong>
+              <span>`proxy.ts` and Clerk decide whether the request is public or enters the signed-in shell.</span>
             </div>
             <div className="diagram-node">
               <strong>Shell and pages</strong>
-              <span>Layouts choose public docs, auth screens, or protected app shell.</span>
+              <span>Layouts choose metadata routes, auth screens, or the protected app shell.</span>
             </div>
             <div className="diagram-node">
               <strong>State orchestration</strong>
-              <span>Stores own cache, selection, folders, bookmarks and preferences.</span>
+              <span>Hooks and stores own selections, folders, bookmarks, preferences, and feed freshness.</span>
             </div>
             <div className="diagram-node">
               <strong>Internal APIs</strong>
-              <span>`/api/rss/search`, `/api/rss/parse`, `/api/rss/explore`</span>
-            </div>
-            <div className="diagram-node">
-              <strong>External feed network</strong>
-              <span>RSS sources plus proxy fallbacks when direct fetches are blocked.</span>
+              <span>`/api/rss/search`, `/api/rss/parse`, and `/api/rss/explore` normalize remote feeds.</span>
             </div>
           </div>
         </section>
@@ -1153,9 +1185,10 @@ export default function ArchitecturePage() {
           <h2>States and storages</h2>
           <p>
             RSS Studio keeps core domain state in Zustand stores and persists
-            selected slices into user-scoped localStorage keys. The examples
-            below reflect the actual persisted shape produced by Zustand
-            `persist`, including the `state` wrapper and `version` field.
+            only durable user data into Clerk-scoped localStorage keys. The
+            examples below reflect the actual persisted shape produced by
+            Zustand `persist`, including the `state` wrapper and `version`
+            field.
           </p>
 
           <div className="store-grid">
@@ -1177,8 +1210,8 @@ export default function ArchitecturePage() {
             Protected app pages mount <code>AuthSync</code>, which sets the
             active Clerk user id, migrates old generic local storage keys to
             user-scoped keys, then rehydrates the persisted stores. This keeps
-            feed subscriptions, bookmarks and settings isolated between users on
-            the same browser.
+            subscriptions, folders, bookmarks, and settings isolated between
+            users on the same browser.
           </div>
 
           <div className="storage-grid">

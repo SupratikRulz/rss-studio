@@ -1,18 +1,32 @@
 # RSS Studio
 
-RSS Studio is a mobile-friendly RSS reader built with Next.js. It lets users discover RSS feeds, subscribe to sources, organize them into folders, read articles, and save bookmarks.
+RSS Studio is a mobile-friendly RSS reader built with Next.js. It helps people discover feeds, subscribe to sources, organize them into folders, read articles in a focused layout, and save bookmarks for later.
 
-## Run The Project
+## Stack
+
+- Next.js 16 App Router
+- React 19
+- TypeScript
+- Tailwind CSS v4
+- Clerk for authentication
+- Zustand for client state and persistence
+- `rss-parser` for RSS and Atom normalization
+
+## Local Setup
 
 ### Prerequisites
 
 - Node.js 20+
 - npm
-- Clerk environment variables configured
+- A Clerk app with local development keys
 
 ### Environment
 
-Create `.env.local` and add the required Clerk public variables:
+Copy `example.env` to `.env.local` and fill in your real Clerk values:
+
+```bash
+cp example.env .env.local
+```
 
 ```bash
 NEXT_PUBLIC_CLERK_SIGN_IN_URL=/sign-in
@@ -23,9 +37,7 @@ NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=<secret-value>
 CLERK_SECRET_KEY=<secret-value>
 ```
 
-Add the rest of your Clerk keys in local environment files as needed.
-
-### Install And Start
+### Install And Run
 
 ```bash
 npm install
@@ -43,196 +55,131 @@ npm run start
 npm run lint
 ```
 
-## Project Architecture
+## Route Map
 
-RSS Studio uses the Next.js App Router with route groups:
+### Product routes
 
-- `(auth)` for sign-in and sign-up pages
-- `(app)` for authenticated application pages
-- `api/rss/*` for RSS search, parse, and explore endpoints
-- `/architecture` for the public architecture documentation page
+- `/` Today page with `me` and `explore` tabs
+- `/search` discover RSS feeds from a URL or curated categories
+- `/sources` manage followed sources
+- `/feeds` browse a selected source feed
+- `/bookmarks` revisit saved articles
+- `/settings` change theme, reading size, and feed layout
+- `/article/[id]` focused reading view for the selected article
 
-Core architectural pieces:
+### Public routes
 
-- `Clerk` handles authentication and route protection
-- `Zustand` manages feeds, bookmarks, settings, and toast state
-- `zustand/persist` stores selected state in user-scoped `localStorage`
-- `AuthSync` rehydrates persisted state when the active user changes
-- RSS route handlers normalize external feed data into app-friendly models
+- `/sign-in` and `/sign-up`
+- `/architecture`
 
-Main state areas:
+### Metadata routes
 
-- `feed-store` manages subscriptions, folders, selected article, and feed fetching
-- `bookmark-store` manages saved articles
-- `settings-store` manages theme, reading preferences, and feed layout
-- `toast-store` manages transient notifications
+- `/robots.txt`
+- `/llms.txt`
 
-## RSS Discovery And Sources
+### Internal RSS APIs
 
-RSS Studio uses both user-provided feeds and curated static sources.
+- `POST /api/rss/search`
+- `POST /api/rss/parse`
+- `GET /api/rss/explore`
 
-### User-provided sources
+## Architecture Overview
 
-- users can paste a direct RSS URL
-- users can paste a website URL and the app will try to discover common feed endpoints such as `/feed`, `/rss`, `/rss.xml`, `/feed.xml`, `/atom.xml`, and `/index.xml`
-- subscribed sources are stored in `feed-store` and fetched through `POST /api/rss/parse`
+RSS Studio uses route groups to separate authentication from the protected application shell:
 
-### Curated search sources
+- `src/app/(auth)` renders Clerk sign-in and sign-up flows
+- `src/app/(app)` renders the authenticated reading experience
+- `src/app/api/rss/*` contains the server routes that search, parse, and aggregate feeds
+- `src/proxy.ts` protects non-public routes with Clerk
 
-Keyword search is backed by a static catalog in `src/lib/discover-sources.ts`.
+Core moving pieces:
 
-This catalog is grouped into sections and categories such as:
+- `ClerkProvider` is mounted in the root layout
+- `AuthSync` migrates old storage keys, sets the active user id, and rehydrates persisted stores
+- `AppShell` renders the shared sidebar, mobile nav, and toast container
+- Zustand stores own user data, runtime feed caches, and reading preferences
+- RSS route handlers normalize third-party feeds into a consistent `FeedItem` shape
 
-- `Popular Topics`: Tech, Cyber Security, Business, News
-- `Industries`: Advertising, Automotive, Healthcare, Financial Services, Energy, Real Estate, Retail
-- `Skills`: Programming, Data Science, Entrepreneurship, Leadership, SEO, Design, Photography, Writing
-- `Fun`: Comics, Gaming, Food, Travel, Music, Culture, Science, Sports
+### State model
 
-The catalog contains predefined RSS sources such as:
+- `feed-store` owns sources, folders, Today feed data, Explore data, source-level caches, selected source, and selected article
+- `bookmark-store` owns saved article snapshots
+- `settings-store` owns theme, reading font size, and feed view mode
+- `toast-store` owns short-lived in-memory notifications
 
-- The Verge
-- TechCrunch
-- Ars Technica
-- Wired
-- BBC News
-- NPR News
-- Reuters
-- Hacker News
-- Martin Fowler
-- xkcd
-- NASA
-- ESPN
+Only the durable user state is persisted. Feed result lists, loading flags, and source cache timestamps stay in memory.
 
-When a search query is not a direct URL, `POST /api/rss/search` matches the query against category names and source metadata from this static catalog and returns matching categories and sources.
-
-### Curated explore sources
-
-The Explore feed is powered by a smaller static list in `src/lib/constants.ts`:
-
-- BBC News
-- Hacker News
-- TechCrunch
-- The Verge
-- Ars Technica
-- NPR News
-
-`GET /api/rss/explore` fetches these feeds, normalizes their items, sorts them by publish date, and returns the newest combined results.
-
-## RSS Parse Mechanism
-
-The RSS parsing flow is one of the more important parts of the app because it has to deal with inconsistent feed formats, missing metadata, and feeds that block normal server requests.
-
-### Parser setup
-
-The app uses `rss-parser` and extends it with custom fields so it can extract richer content:
-
-- `media:content`
-- `media:thumbnail`
-- `content:encoded`
-
-This allows the parser to work with feeds that embed images or full article HTML in non-default fields.
-
-### Fetch strategy
-
-`POST /api/rss/parse` receives a feed URL and tries to retrieve valid XML using a staged fallback strategy:
-
-1. Direct fetch with browser-like headers and redirect support
-2. Proxy fetch through `api.codetabs.com`
-3. Proxy fetch through `api.allorigins.win`
-
-Each request uses a timeout via `AbortSignal.timeout(...)`. The route also checks that the response actually looks like XML before trying to parse it.
-
-This fallback chain is important because many feeds:
-
-- block automated requests
-- sit behind Cloudflare or similar protection
-- redirect to HTML pages instead of XML
-- expose XML only through alternate feed endpoints
-
-### Parse flowchart
+### Request and data flow
 
 ```mermaid
 flowchart TD
-  receive[Receive feed URL] --> direct[Fetch directly with headers]
-  direct --> directValid{Valid XML?}
-  directValid -->|Yes| parse[Parse with rss-parser]
-  directValid -->|No| codetabs[Fetch via Codetabs proxy]
-  codetabs --> codetabsValid{Valid XML?}
-  codetabsValid -->|Yes| parse
-  codetabsValid -->|No| allOrigins[Fetch via AllOrigins proxy]
-  allOrigins --> allOriginsValid{Valid XML?}
-  allOriginsValid -->|Yes| parse
-  allOriginsValid -->|No| parseError[Return parse error]
-  parse --> normalize[Normalize items and metadata]
+  request[User requests a route] --> public{Public route?}
+  public -->|Yes| publicRender[Render auth page or architecture page]
+  public -->|No| protect[Clerk protects request in proxy.ts]
+  protect --> appLayout[Mount root layout and app layout]
+  appLayout --> sync[AuthSync rehydrates user-scoped Zustand stores]
+  sync --> page[Page component reads stores and URL state]
+  page --> api[Call internal RSS API when feed data is needed]
+  api --> fetch[Fetch RSS directly or through fallback proxies]
+  fetch --> normalize[Normalize items and metadata]
+  normalize --> store[Update store state and UI]
 ```
 
+## RSS Discovery And Parsing
 
+RSS Studio combines user-supplied feeds with curated catalogs.
 
-### Feed normalization
+### Search sources
 
-After valid XML is retrieved, the route parses the feed and converts every item into a consistent internal shape.
+- URL-like queries are treated as feed discovery attempts
+- keyword queries search the curated catalog in `src/lib/discover-sources.ts`
+- curated categories are grouped into `Popular Topics`, `Industries`, `Skills`, and `Fun`
 
-Each normalized item includes:
+### Explore sources
 
-- stable generated `id`
-- `title`
-- `link`
-- `description`
-- `content`
-- `imageUrl`
-- `author`
-- `pubDate`
-- `sourceName`
-- `sourceUrl`
-- `sourceId`
+`GET /api/rss/explore` fetches a smaller hand-picked set from `src/lib/constants.ts`:
 
-### Content and snippet handling
+- BBC News
+- Hacker News
+- TechCrunch
+- The Verge
+- Ars Technica
+- NPR News
 
-- full article HTML is read from `content:encoded` when available
-- otherwise it falls back to `item.content`
-- the shorter preview text comes from `contentSnippet`
-- if no snippet exists, HTML is stripped and the content is truncated for preview use
+### Parse strategy
 
-### Image extraction
+`POST /api/rss/parse` tries to retrieve valid XML in stages:
 
-The parser attempts image extraction in this order:
+1. Direct fetch with browser-like headers
+2. `api.codetabs.com` proxy fallback
+3. `api.allorigins.win` proxy fallback
 
-1. enclosure URL
-2. `media:thumbnail`
-3. `media:content`
-4. first image found inside the HTML body
+The parser is configured to read custom fields such as `media:content`, `media:thumbnail`, and `content:encoded`, then normalize each item into the app model with title, link, description, content, image, author, publish date, and source metadata.
 
-This allows the UI to show thumbnails even when feeds use different RSS or Atom conventions.
+```mermaid
+flowchart TD
+  input[Receive feed URL] --> direct[Direct fetch]
+  direct --> directOk{XML returned?}
+  directOk -->|Yes| parse[Parse with rss-parser]
+  directOk -->|No| codetabs[Fetch via Codetabs]
+  codetabs --> codetabsOk{XML returned?}
+  codetabsOk -->|Yes| parse
+  codetabsOk -->|No| allOrigins[Fetch via AllOrigins]
+  allOrigins --> allOriginsOk{XML returned?}
+  allOriginsOk -->|Yes| parse
+  allOriginsOk -->|No| fail[Return parse error]
+  parse --> normalize[Normalize feed items]
+```
 
-### Search parsing
-
-The search route uses a lighter version of the same parsing logic:
-
-- if the query looks like a URL, it first tries that URL directly as a feed
-- if that fails, it tries common feed paths on the same origin
-- once a feed is discovered, it parses the feed and returns basic feed metadata plus up to 5 preview items
-
-### Explore parsing
-
-The explore route reuses the same core parsing ideas for a static set of sources:
-
-- fetch all curated explore feeds in parallel
-- parse each feed independently
-- keep successful results even if some feeds fail
-- normalize and merge all items
-- sort by `pubDate`
-- return the latest combined set
-
-### Why this is more complex than a normal fetch
-
-RSS feeds are not uniform. Different publishers expose different fields, different content formats, and different network restrictions. The parse route exists to hide that variability from the UI and return a predictable feed model that the rest of the app can safely render.
-
-## Folder Structure
+## Project Structure
 
 ```text
 src/
 ├─ app/
 │  ├─ layout.tsx
+│  ├─ globals.css
+│  ├─ robots.ts
+│  ├─ llms.txt/route.ts
 │  ├─ architecture/page.tsx
 │  ├─ (auth)/
 │  │  ├─ layout.tsx
@@ -253,77 +200,43 @@ src/
 │     └─ explore/route.ts
 ├─ components/
 │  ├─ layout/
+│  ├─ pages/
+│  │  ├─ article/
+│  │  ├─ feeds/
+│  │  ├─ search/
+│  │  ├─ settings/
+│  │  ├─ sources/
+│  │  └─ today/
 │  ├─ feed/
+│  ├─ feeds/
 │  ├─ sources/
 │  └─ ui/
-├─ stores/
 ├─ hooks/
+│  ├─ pages/
+│  │  ├─ article/
+│  │  ├─ feeds/
+│  │  ├─ search/
+│  │  └─ today/
+│  └─ use-article-transition.ts
 ├─ lib/
+├─ stores/
 └─ proxy.ts
 ```
 
-Other important project folders:
+### Key folders outside `src`
 
 ```text
+public/
 prompts/
-├─ 01 - Start.md
-├─ 02 - Refator Functionality Feeds.md
-├─ 03 - Today-Me Logic Refactor.md
-├─ 04 - Ability To Delete Feeds Folder.md
-└─ 05 - Add Authentication Using Clerk.md
-
-.claude/skills/
-├─ frontend-patterns/SKILL.md
-├─ tailwind-design-system/SKILL.md
-└─ web-animation-design/SKILL.md
+example.env
+next.config.ts
+eslint.config.mjs
 ```
-
-Direct links:
-
-- Prompts
-  - `[prompts/01 - Start.md](prompts/01 - Start.md)`
-  - `[prompts/02 - Refator Functionality Feeds.md](prompts/02 - Refator Functionality Feeds.md)`
-  - `[prompts/03 - Today-Me Logic Refactor.md](prompts/03 - Today-Me Logic Refactor.md)`
-  - `[prompts/04 - Ability To Delete Feeds Folder.md](prompts/04 - Ability To Delete Feeds Folder.md)`
-  - `[prompts/05 - Add Authentication Using Clerk.md](prompts/05 - Add Authentication Using Clerk.md)`
-- Skills
-  - `[frontend-patterns](.claude/skills/frontend-patterns/SKILL.md)`
-  - `[tailwind-design-system](.claude/skills/tailwind-design-system/SKILL.md)`
-  - `[web-animation-design](.claude/skills/web-animation-design/SKILL.md)`
-
-## AI Usage
-
-This repository includes prompt files and reusable skill documents to guide AI-assisted development.
-
-### Prompts
-
-The `[prompts/](prompts/)` folder contains task-specific briefs used to plan or implement larger features. Each prompt describes a focused piece of work, such as authentication, feed refactors, or folder management.
-
-Typical usage:
-
-- pick the prompt that matches the feature or refactor you want to work on
-- use it as the implementation brief for an AI assistant or as a structured task note for manual development
-- update code based on that prompt while keeping the repository architecture and rules consistent
-
-### Skills
-
-The `[.claude/skills/](.claude/skills/)` folder contains reusable guidance documents for common development patterns:
-
-- `[frontend-patterns](.claude/skills/frontend-patterns/SKILL.md)` for React and Next.js architecture and UI implementation
-- `[tailwind-design-system](.claude/skills/tailwind-design-system/SKILL.md)` for styling patterns, tokens, and component consistency
-- `[web-animation-design](.claude/skills/web-animation-design/SKILL.md)` for animation, motion, and transition decisions
-
-Typical usage:
-
-- load the relevant skill before starting a UI or architecture task
-- follow the skill guidance while implementing the feature
-- combine a task prompt from `[prompts/](prompts/)` with one or more skills from `[.claude/skills/](.claude/skills/)` when working on larger changes
-
-In practice, prompts define **what** to build, while skills guide **how** to build it consistently.
 
 ## Notes
 
-- App routes are protected through Clerk middleware, except public auth routes and `/architecture`.
-- Feed data is fetched from external RSS feeds and normalized on the server.
-- User-specific persisted state is namespaced in browser storage so multiple signed-in users on the same device do not share app data.
+- Protected product routes are enforced in `src/proxy.ts`
+- Persisted state is namespaced per Clerk user in `localStorage`
+- The article page depends on `selectedArticle` from `feed-store`, so direct refreshes fall back to an article-not-found state
+- `/architecture` is the best place to see the current structure and feature flows in a browser-friendly format
 
