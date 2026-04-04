@@ -1,5 +1,6 @@
 import { Loader2, Plus } from "lucide-react";
 import Dialog from "@/components/ui/dialog";
+import NativeSelect from "@/components/ui/native-select";
 
 interface FolderPickerDialogProps {
   open: boolean;
@@ -46,17 +47,18 @@ export default function FolderPickerDialog({
         <div>
           {!showNewFolder ? (
             <div className="flex gap-2">
-              <select
+              <NativeSelect
                 value={folderId}
                 onChange={(event) => setFolderId(event.target.value)}
-                className="flex-1 rounded-lg border border-gray-200 dark:border-neutral-700 px-3.5 py-2.5 text-sm text-gray-900 dark:text-neutral-100 bg-white dark:bg-neutral-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 pr-10 text-sm text-gray-900 transition-colors cursor-pointer focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+                wrapperClassName="flex-1"
               >
                 {folders.map((folder) => (
                   <option key={folder.id} value={folder.id}>
                     {folder.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
               <button
                 type="button"
                 onClick={() => setShowNewFolder(true)}

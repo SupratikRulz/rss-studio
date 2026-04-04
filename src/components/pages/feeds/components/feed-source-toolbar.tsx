@@ -1,6 +1,7 @@
-import { ChevronDown, FolderInput, RefreshCw } from "lucide-react";
+import { FolderInput, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { FeedSource, Folder } from "@/lib/types";
+import NativeSelect from "@/components/ui/native-select";
 
 interface FeedSourceToolbarProps {
   selectedSource: FeedSource;
@@ -40,23 +41,18 @@ export default function FeedSourceToolbar({
       {showFolderInputIcon && (
         <FolderInput size={15} className="text-gray-400 dark:text-neutral-500" />
       )}
-      <div className="relative">
-        <select
-          value={selectedSource.folderId}
-          onChange={(event) => onMoveToFolder(event.target.value)}
-          className={selectClassName}
-        >
-          {folders.map((folder) => (
-            <option key={folder.id} value={folder.id}>
-              {folder.name}
-            </option>
-          ))}
-        </select>
-        <ChevronDown
-          size={showFolderInputIcon ? 14 : 12}
-          className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500"
-        />
-      </div>
+      <NativeSelect
+        value={selectedSource.folderId}
+        onChange={(event) => onMoveToFolder(event.target.value)}
+        className={selectClassName}
+        iconSize={showFolderInputIcon ? 14 : 12}
+      >
+        {folders.map((folder) => (
+          <option key={folder.id} value={folder.id}>
+            {folder.name}
+          </option>
+        ))}
+      </NativeSelect>
     </div>
   );
 }

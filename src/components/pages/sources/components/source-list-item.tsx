@@ -1,6 +1,7 @@
 import { ExternalLink, Trash2 } from "lucide-react";
 import type { FeedSource, Folder } from "@/lib/types";
 import SourceIcon from "@/components/ui/source-icon";
+import NativeSelect from "@/components/ui/native-select";
 
 interface SourceListItemProps {
   source: FeedSource;
@@ -49,18 +50,20 @@ export default function SourceListItem({
       </button>
 
       <div className="flex items-center gap-1 shrink-0">
-        <select
+        <NativeSelect
           value={source.folderId}
           onChange={(event) => onMoveToFolder(source.id, event.target.value)}
           onClick={(event) => event.stopPropagation()}
-          className="text-xs font-medium text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/20 rounded px-1.5 py-0.5 border-none cursor-pointer hover:bg-emerald-100 dark:hover:bg-emerald-900/40 transition-colors focus:outline-none focus:ring-1 focus:ring-emerald-400"
+          className="rounded border-none bg-emerald-50 px-1.5 py-0.5 pr-6 text-xs font-medium text-emerald-600 transition-colors cursor-pointer hover:bg-emerald-100 focus:outline-none focus:ring-1 focus:ring-emerald-400 dark:bg-emerald-900/20 dark:text-emerald-400 dark:hover:bg-emerald-900/40"
+          chevronClassName="right-1.5 text-emerald-600 dark:text-emerald-400"
+          iconSize={12}
         >
           {folders.map((folder) => (
             <option key={folder.id} value={folder.id}>
               {folder.name}
             </option>
           ))}
-        </select>
+        </NativeSelect>
         <a
           href={source.siteUrl}
           target="_blank"

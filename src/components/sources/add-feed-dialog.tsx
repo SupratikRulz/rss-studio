@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Plus, Loader2 } from "lucide-react";
 import Dialog from "@/components/ui/dialog";
+import NativeSelect from "@/components/ui/native-select";
 import useFeedStore from "@/stores/feed-store";
 import useToastStore from "@/stores/toast-store";
 import { addFeedInputSchema, addFolderInputSchema } from "@/lib/schemas";
@@ -139,18 +140,19 @@ export default function AddFeedDialog({ open, onClose }: AddFeedDialogProps) {
           </label>
           {!showNewFolder ? (
             <div className="flex gap-2">
-              <select
+              <NativeSelect
                 id="folder-select"
                 value={folderId}
                 onChange={(e) => setFolderId(e.target.value)}
-                className="flex-1 rounded-lg border border-gray-200 dark:border-neutral-700 px-3.5 py-2.5 text-sm text-gray-900 dark:text-neutral-100 bg-white dark:bg-neutral-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full rounded-lg border border-gray-200 bg-white px-3.5 py-2.5 pr-10 text-sm text-gray-900 transition-colors cursor-pointer focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 dark:border-neutral-700 dark:bg-neutral-800 dark:text-neutral-100"
+                wrapperClassName="flex-1"
               >
                 {folders.map((f) => (
                   <option key={f.id} value={f.id}>
                     {f.name}
                   </option>
                 ))}
-              </select>
+              </NativeSelect>
               <button
                 type="button"
                 onClick={() => setShowNewFolder(true)}
