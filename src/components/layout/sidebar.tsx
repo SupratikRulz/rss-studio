@@ -13,6 +13,7 @@ import {
   Search,
   Library,
 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
 import useFeedStore from "@/stores/feed-store";
@@ -26,6 +27,36 @@ const ICONS: Record<string, React.ElementType> = {
   sources: Rss,
   feeds: FolderOpen,
 };
+
+function SettingsNavLink({ active }: { active: boolean }) {
+  const { user } = useUser();
+
+  return (
+    <Link
+      href="/settings"
+      className={cn(
+        "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer",
+        active
+          ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
+          : "text-gray-600 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-900 hover:text-gray-900 dark:hover:text-neutral-200"
+      )}
+    >
+      {user?.imageUrl ? (
+        <img
+          src={user.imageUrl}
+          alt=""
+          width={18}
+          height={18}
+          className="rounded-full"
+          referrerPolicy="no-referrer"
+        />
+      ) : (
+        <CircleUserRound size={18} strokeWidth={active ? 2.2 : 1.8} />
+      )}
+      Settings
+    </Link>
+  );
+}
 
 export default function Sidebar() {
   const pathname = usePathname();
@@ -203,18 +234,7 @@ export default function Sidebar() {
 
       {/* Settings at bottom */}
       <div className="px-3 py-3 border-t border-gray-200 dark:border-neutral-800">
-        <Link
-          href="/settings"
-          className={cn(
-            "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors cursor-pointer",
-            settingsActive
-              ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-700 dark:text-emerald-400"
-              : "text-gray-600 dark:text-neutral-400 hover:bg-gray-100 dark:hover:bg-neutral-900 hover:text-gray-900 dark:hover:text-neutral-200"
-          )}
-        >
-          <CircleUserRound size={18} strokeWidth={settingsActive ? 2.2 : 1.8} />
-          Settings
-        </Link>
+        <SettingsNavLink active={settingsActive} />
       </div>
 
       {/* Add Folder Dialog */}

@@ -11,6 +11,7 @@ import {
   Search,
   Library,
 } from "lucide-react";
+import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
 
@@ -23,6 +24,7 @@ const ICONS: Record<string, React.ElementType> = {
 
 export default function MobileNav() {
   const pathname = usePathname();
+  const { user } = useUser();
 
   function isActive(href: string) {
     if (href === "/") return pathname === "/";
@@ -119,7 +121,18 @@ export default function MobileNav() {
                 : "text-gray-400 dark:text-neutral-500"
             )}
           >
-            <CircleUserRound size={20} strokeWidth={settingsActive ? 2.2 : 1.8} />
+            {user?.imageUrl ? (
+              <img
+                src={user.imageUrl}
+                alt=""
+                width={20}
+                height={20}
+                className="rounded-full"
+                referrerPolicy="no-referrer"
+              />
+            ) : (
+              <CircleUserRound size={20} strokeWidth={settingsActive ? 2.2 : 1.8} />
+            )}
             Settings
           </Link>
         </div>
