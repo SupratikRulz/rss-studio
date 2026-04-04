@@ -43,6 +43,7 @@ export default function BookmarkButton({
   return (
     <button
       onClick={handleToggle}
+      aria-label={bookmarked ? "Remove bookmark" : "Bookmark this article"}
       className={cn(
         "rounded-lg p-1.5 transition-colors cursor-pointer",
         bookmarked

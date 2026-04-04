@@ -53,7 +53,42 @@ npm run dev
 npm run build
 npm run start
 npm run lint
+npm run test:unit
+npm run test:e2e
 ```
+
+## Testing
+
+This project now includes first-party unit/integration coverage with Vitest and end-to-end coverage with Playwright.
+
+### Unit tests
+
+```bash
+npm run test:unit
+npm run test:watch
+```
+
+The Vitest suite covers:
+
+- `src/lib/*` helpers and schemas
+- Zustand store behavior and persistence-sensitive flows
+- RSS API route handlers with mocked fetch responses and fixed XML fixtures
+
+### End-to-end tests
+
+```bash
+npm run test:e2e
+npm run test:e2e:ui
+```
+
+Playwright starts the app with mocked auth and fixture-backed RSS APIs through `npm run dev:test`, so the browser suite does not require real Clerk credentials or live third-party RSS access.
+
+The current browser coverage focuses on:
+
+- Today page personalized and explore flows
+- Search-driven subscription flows
+- Feed browsing and article bookmarking
+- Settings persistence and mocked sign-out behavior
 
 ## Route Map
 

@@ -12,6 +12,13 @@ interface SourceIconProps {
   className?: string;
 }
 
+const PLACEHOLDER_DOMAINS = new Set([
+  "example.com",
+  "www.example.com",
+  "localhost",
+  "127.0.0.1",
+]);
+
 function getDomain(url: string): string {
   try {
     return new URL(url).hostname;
@@ -21,7 +28,7 @@ function getDomain(url: string): string {
 }
 
 function getFaviconUrls(domain: string, size: number): string[] {
-  if (!domain) return [];
+  if (!domain || PLACEHOLDER_DOMAINS.has(domain)) return [];
   const hiRes = Math.max(size * 3, 128);
   return [
     `https://icon.horse/icon/${domain}`,

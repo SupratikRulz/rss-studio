@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Show, SignInButton } from "@clerk/nextjs";
 import { LogIn, User } from "lucide-react";
+import { Show, SignInButton } from "@/lib/auth";
 import UserAvatar from "./user-avatar";
 
 export default function SettingsAccountSection() {

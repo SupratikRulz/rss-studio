@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { SignIn } from "@clerk/nextjs";
 import { Rss } from "lucide-react";
+import { SignIn } from "@/lib/auth";
 import { createPageMetadata } from "@/lib/seo";
 
 export const metadata: Metadata = createPageMetadata({

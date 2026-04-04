@@ -13,9 +13,9 @@ import {
   Search,
   Library,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
+import { useUser } from "@/lib/auth";
 import useFeedStore from "@/stores/feed-store";
 import FeedTree from "@/components/feeds/feed-tree";
 import Dialog, { ConfirmDialog } from "@/components/ui/dialog";

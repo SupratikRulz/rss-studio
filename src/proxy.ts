@@ -1,3 +1,4 @@
+import { NextResponse } from "next/server";
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server'
 
 const isPublicRoute = createRouteMatcher([
@@ -6,11 +7,17 @@ const isPublicRoute = createRouteMatcher([
   '/architecture(.*)',
 ])
 
-export default clerkMiddleware(async (auth, req) => {
+const authMiddleware = clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
     await auth.protect()
   }
 })
+
+export default process.env.E2E_TEST_MODE === "1"
+  ? function testProxy() {
+      return NextResponse.next()
+    }
+  : authMiddleware
 
 export const config = {
   matcher: [

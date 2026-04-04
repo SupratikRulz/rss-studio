@@ -1,4 +1,4 @@
-import { Show, useClerk } from "@clerk/nextjs";
+import { Show, useClerk } from "@/lib/auth";
 import { LogOut } from "lucide-react";
 
 export default function SettingsHeader() {

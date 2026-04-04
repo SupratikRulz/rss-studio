@@ -29,6 +29,7 @@ export default function SettingsFeedViewSection({
             <button
               key={option.id}
               onClick={() => onChange(option.id)}
+              aria-label={`Feed view ${option.label}`}
               className={cn(
                 "flex flex-col items-center gap-2 rounded-xl p-4 border-2 transition-all cursor-pointer",
                 isActive

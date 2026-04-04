@@ -1,4 +1,4 @@
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 
 interface UserAvatarProps {
   size: number;

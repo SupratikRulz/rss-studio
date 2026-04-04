@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import useSettingsStore from "@/stores/settings-store";
 import SettingsAccountSection from "@/components/pages/settings/components/settings-account-section";
 import SettingsAppearanceSection from "@/components/pages/settings/components/settings-appearance-section";
@@ -9,6 +8,7 @@ import SettingsHeader, {
   SettingsLoadingHeader,
 } from "@/components/pages/settings/components/settings-header";
 import SettingsReadingSection from "@/components/pages/settings/components/settings-reading-section";
+import useStoreHydrated from "@/hooks/use-store-hydrated";
 
 export default function SettingsPageClient() {
   const {
@@ -19,17 +19,7 @@ export default function SettingsPageClient() {
     setReadingFontSize,
     setFeedView,
   } = useSettingsStore();
-  const [isStoreHydrated, setIsStoreHydrated] = useState(() =>
-    useSettingsStore.persist.hasHydrated()
-  );
-
-  useEffect(() => {
-    const unsubscribe = useSettingsStore.persist.onFinishHydration(() => {
-      setIsStoreHydrated(true);
-    });
-
-    return unsubscribe;
-  }, []);
+  const isStoreHydrated = useStoreHydrated(useSettingsStore.persist);
 
   if (!isStoreHydrated) {
     return (

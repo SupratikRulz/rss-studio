@@ -29,6 +29,7 @@ export default function SettingsReadingSection({
         <div className="flex items-center gap-3">
           <button
             onClick={() => onChange(readingFontSize - 1)}
+            aria-label="Decrease font size"
             disabled={readingFontSize <= 12}
             className="rounded-lg p-1.5 border border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >
@@ -45,6 +46,7 @@ export default function SettingsReadingSection({
           />
           <button
             onClick={() => onChange(readingFontSize + 1)}
+            aria-label="Increase font size"
             disabled={readingFontSize >= 48}
             className="rounded-lg p-1.5 border border-gray-200 dark:border-neutral-700 text-gray-500 dark:text-neutral-400 hover:bg-gray-50 dark:hover:bg-neutral-800 disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer transition-colors"
           >

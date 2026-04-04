@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect } from "react";
 import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.shared-runtime";
 import type { ReadonlyURLSearchParams } from "next/navigation";
 import useFeedStore from "@/stores/feed-store";
 import type { FeedItem, FeedSource } from "@/lib/types";
+import useStoreHydrated from "@/hooks/use-store-hydrated";
 
 interface UseFeedsSourceParamArgs {
   router: AppRouterInstance;
@@ -25,9 +26,7 @@ export default function useFeedsSourceParam({
   fetchSourceFeed,
   setSelectedSourceId,
 }: UseFeedsSourceParamArgs) {
-  const [isStoreHydrated, setIsStoreHydrated] = useState(() =>
-    useFeedStore.persist.hasHydrated()
-  );
+  const isStoreHydrated = useStoreHydrated(useFeedStore.persist);
   const sourceParam = searchParams.get("source");
 
   const replaceSourceParam = useCallback(
@@ -47,14 +46,6 @@ export default function useFeedsSourceParam({
     },
     [router, searchParams]
   );
-
-  useEffect(() => {
-    const unsubscribe = useFeedStore.persist.onFinishHydration(() => {
-      setIsStoreHydrated(true);
-    });
-
-    return unsubscribe;
-  }, []);
 
   useEffect(() => {
     if (

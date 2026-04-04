@@ -11,9 +11,9 @@ import {
   Search,
   Library,
 } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
 import { cn } from "@/lib/utils";
 import { NAV_ITEMS } from "@/lib/constants";
+import { useUser } from "@/lib/auth";
 
 const ICONS: Record<string, React.ElementType> = {
   today: Newspaper,

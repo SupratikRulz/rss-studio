@@ -20,6 +20,10 @@ interface OptimizedImageProps {
   hideContainerOnError?: boolean;
 }
 
+function isRemoteImage(src: string): boolean {
+  return /^https?:\/\//i.test(src);
+}
+
 export default function OptimizedImage({
   src,
   alt = "",
@@ -36,6 +40,7 @@ export default function OptimizedImage({
   hideContainerOnError = false,
 }: OptimizedImageProps) {
   const [failed, setFailed] = useState(false);
+  const isRemote = isRemoteImage(src);
 
   if (failed) {
     if (hideOnError || hideContainerOnError) return null;
@@ -46,15 +51,45 @@ export default function OptimizedImage({
     src,
     alt,
     className: cn("object-cover", className),
-    quality,
     loading: (priority ? undefined : "lazy") as "lazy" | undefined,
     fetchPriority: (priority ? "high" : "low") as "high" | "low",
     onError: () => {
       setFailed(true);
       onError?.();
     },
-    unoptimized: false,
   };
+
+  if (isRemote) {
+    if (fill) {
+      return (
+        <img
+          src={src}
+          alt={alt}
+          className={cn("h-full w-full object-cover", className)}
+          loading={priority ? undefined : "lazy"}
+          onError={() => {
+            setFailed(true);
+            onError?.();
+          }}
+        />
+      );
+    }
+
+    return (
+      <img
+        src={src}
+        alt={alt}
+        width={width || 800}
+        height={height || 450}
+        className={cn("object-cover", className)}
+        loading={priority ? undefined : "lazy"}
+        onError={() => {
+          setFailed(true);
+          onError?.();
+        }}
+      />
+    );
+  }
 
   if (fill) {
     return (
@@ -62,6 +97,7 @@ export default function OptimizedImage({
         {...commonProps}
         fill
         sizes={sizes || "100vw"}
+        quality={quality}
       />
     );
   }
@@ -72,6 +108,7 @@ export default function OptimizedImage({
       width={width || 800}
       height={height || 450}
       sizes={sizes}
+      quality={quality}
     />
   );
 }

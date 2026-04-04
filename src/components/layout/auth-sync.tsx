@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useUser } from "@/lib/auth";
 import { setCurrentUserId, migrateToUserStorage } from "@/lib/user-storage";
 import useFeedStore from "@/stores/feed-store";
 import useBookmarkStore from "@/stores/bookmark-store";
