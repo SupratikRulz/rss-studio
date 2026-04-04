@@ -72,7 +72,7 @@ export function cn(...classes: (string | boolean | undefined | null)[]): string 
   return classes.filter(Boolean).join(" ");
 }
 
-export function proxyArticleImages(html: string, width = 768, quality = 75): string {
+export function proxyArticleImages(html: string, width = 828, quality = 75): string {
   if (!html) return "";
   return html.replace(
     /<img([^>]+)src=["']([^"']+)["']/gi,
@@ -82,4 +82,45 @@ export function proxyArticleImages(html: string, width = 768, quality = 75): str
       return `<img${before}src="${proxied}" loading="lazy"`;
     }
   );
+}
+
+function normalizeImageUrl(url: string): string {
+  const trimmed = url.trim().replace(/&amp;/g, "&");
+  if (!trimmed) return "";
+
+  try {
+    const parsed = new URL(trimmed);
+    parsed.hash = "";
+
+    if (parsed.pathname.startsWith("/_next/image")) {
+      const nested = parsed.searchParams.get("url");
+      if (nested) return normalizeImageUrl(decodeURIComponent(nested));
+    }
+
+    parsed.search = "";
+    return `${parsed.origin}${parsed.pathname}`.replace(/\/+$/, "").toLowerCase();
+  } catch {
+    return trimmed.replace(/[?#].*$/, "").replace(/\/+$/, "").toLowerCase();
+  }
+}
+
+export function removeFirstDuplicateContentImage(
+  html: string,
+  leadImageUrl?: string
+): string {
+  if (!html || !leadImageUrl) return html;
+
+  const normalizedLead = normalizeImageUrl(leadImageUrl);
+  if (!normalizedLead || typeof DOMParser === "undefined") return html;
+
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const firstImage = doc.querySelector("img");
+
+  if (!firstImage) return html;
+
+  const firstImageSrc = firstImage.getAttribute("src") || "";
+  if (normalizeImageUrl(firstImageSrc) !== normalizedLead) return html;
+
+  firstImage.remove();
+  return doc.body.innerHTML;
 }

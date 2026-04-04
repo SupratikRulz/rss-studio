@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Newspaper,
   Bookmark,
@@ -61,6 +61,7 @@ function SettingsNavLink({ active }: { active: boolean }) {
 export default function Sidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [feedsExpanded, setFeedsExpanded] = useState(true);
   const [sourcesExpanded, setSourcesExpanded] = useState(true);
   const { fetchSourceFeed, selectedSourceId, addFolder, removeFolder } =
@@ -81,7 +82,7 @@ export default function Sidebar() {
 
   function handleSourceSelect(sourceId: string) {
     fetchSourceFeed(sourceId);
-    router.push("/feeds");
+    router.push(`/feeds?source=${encodeURIComponent(sourceId)}`);
   }
 
   function handleAddFolder(e: React.FormEvent) {
@@ -102,6 +103,9 @@ export default function Sidebar() {
   }
 
   const settingsActive = pathname === "/settings";
+  const activeFeedSourceId = pathname.startsWith("/feeds")
+    ? searchParams.get("source") || selectedSourceId
+    : null;
 
   return (
     <aside className="hidden lg:flex flex-col w-60 border-r border-gray-200 dark:border-neutral-800 bg-gray-50/50 dark:bg-neutral-950 h-screen sticky top-0">
@@ -203,7 +207,7 @@ export default function Sidebar() {
                   <div className="mt-1 ml-2 pl-2 animate-expand">
                     <FeedTree
                       onSourceSelect={handleSourceSelect}
-                      selectedSourceId={pathname.startsWith("/feeds") ? selectedSourceId : null}
+                      selectedSourceId={activeFeedSourceId}
                       onAddFolder={() => setShowAddFolder(true)}
                       onDeleteFolder={(id) => setDeleteTarget(id)}
                       compact

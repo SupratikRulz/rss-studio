@@ -1,11 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   FolderOpen,
   Plus,
   ArrowLeft,
-  Rss,
   FolderInput,
   ChevronDown,
   RefreshCw,
@@ -18,7 +18,9 @@ import FeedList from "@/components/feed/feed-list";
 import { addFolderInputSchema } from "@/lib/schemas";
 import SourceIcon from "@/components/ui/source-icon";
 
-export default function FeedsPage() {
+function FeedsPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const {
     folders,
     sources,
@@ -36,9 +38,36 @@ export default function FeedsPage() {
   const [newFolderName, setNewFolderName] = useState("");
   const [folderError, setFolderError] = useState("");
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-  const [mobileShowArticles, setMobileShowArticles] = useState(false);
+  const [isStoreHydrated, setIsStoreHydrated] = useState(() =>
+    useFeedStore.persist.hasHydrated()
+  );
 
+  const sourceParam = searchParams.get("source");
+  const mobileShowArticles = Boolean(sourceParam);
   const selectedSource = sources.find((s) => s.id === selectedSourceId);
+
+  const replaceSourceParam = useCallback(
+    (sourceId: string | null) => {
+      const params = new URLSearchParams(searchParams.toString());
+
+      if (sourceId) params.set("source", sourceId);
+      else params.delete("source");
+
+      const nextQuery = params.toString();
+      router.replace(nextQuery ? `/feeds?${nextQuery}` : "/feeds", {
+        scroll: false,
+      });
+    },
+    [router, searchParams]
+  );
+
+  useEffect(() => {
+    const unsubscribe = useFeedStore.persist.onFinishHydration(() => {
+      setIsStoreHydrated(true);
+    });
+
+    return unsubscribe;
+  }, []);
 
   useEffect(() => {
     if (selectedSourceId && sourceFeedItems.length === 0 && !isLoadingSourceFeed) {
@@ -46,14 +75,47 @@ export default function FeedsPage() {
     }
   }, [selectedSourceId, sourceFeedItems.length, isLoadingSourceFeed, fetchSourceFeed]);
 
+  useEffect(() => {
+    if (!sourceParam || !isStoreHydrated) {
+      return;
+    }
+
+    const sourceExists = sources.some((source) => source.id === sourceParam);
+    if (!sourceExists) {
+      if (selectedSourceId === sourceParam) {
+        setSelectedSourceId(null);
+      }
+      replaceSourceParam(null);
+      return;
+    }
+
+    if (selectedSourceId !== sourceParam) {
+      fetchSourceFeed(sourceParam);
+    }
+  }, [
+    sourceParam,
+    sources,
+    selectedSourceId,
+    isStoreHydrated,
+    fetchSourceFeed,
+    replaceSourceParam,
+    setSelectedSourceId,
+  ]);
+
+  useEffect(() => {
+    if (isStoreHydrated && !sourceParam && selectedSourceId) {
+      setSelectedSourceId(null);
+    }
+  }, [sourceParam, selectedSourceId, isStoreHydrated, setSelectedSourceId]);
+
   function handleSourceSelect(sourceId: string) {
+    replaceSourceParam(sourceId);
     fetchSourceFeed(sourceId);
-    setMobileShowArticles(true);
   }
 
   function handleMobileBack() {
-    setMobileShowArticles(false);
     setSelectedSourceId(null);
+    replaceSourceParam(null);
   }
 
   function handleAddFolder(e: React.FormEvent) {
@@ -311,5 +373,25 @@ export default function FeedsPage() {
         variant="danger"
       />
     </div>
+  );
+}
+
+function FeedsPageFallback() {
+  return (
+    <div className="max-w-3xl mx-auto animate-page min-h-[40vh]">
+      <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
+        <div className="px-4 sm:px-6 py-5">
+          <div className="h-7 w-24 bg-gray-200 dark:bg-neutral-800 rounded-md animate-pulse" />
+        </div>
+      </header>
+    </div>
+  );
+}
+
+export default function FeedsPage() {
+  return (
+    <Suspense fallback={<FeedsPageFallback />}>
+      <FeedsPageContent />
+    </Suspense>
   );
 }

@@ -6,7 +6,11 @@ import useFeedStore from "@/stores/feed-store";
 import BookmarkButton from "@/components/feed/bookmark-button";
 import OptimizedImage from "@/components/ui/optimized-image";
 import ShareButtons from "@/components/feed/share-buttons";
-import { formatDate, proxyArticleImages } from "@/lib/utils";
+import {
+  formatDate,
+  proxyArticleImages,
+  removeFirstDuplicateContentImage,
+} from "@/lib/utils";
 
 export default function ArticlePage() {
   const router = useRouter();
@@ -27,6 +31,12 @@ export default function ArticlePage() {
   }
 
   const article = selectedArticle;
+  const articleContent = proxyArticleImages(
+    removeFirstDuplicateContentImage(
+      article.content || article.description || "",
+      article.imageUrl
+    )
+  );
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -105,7 +115,7 @@ export default function ArticlePage() {
             prose-strong:text-gray-800
             prose-blockquote:border-emerald-200 prose-blockquote:text-gray-500"
           dangerouslySetInnerHTML={{
-            __html: proxyArticleImages(article.content || article.description || ""),
+            __html: articleContent,
           }}
         />
 

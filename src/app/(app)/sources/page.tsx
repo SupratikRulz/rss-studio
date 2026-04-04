@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import { Plus, Rss, Trash2, ExternalLink, Search, X } from "lucide-react";
 import useFeedStore from "@/stores/feed-store";
 import useToastStore from "@/stores/toast-store";
@@ -9,6 +10,7 @@ import { ConfirmDialog } from "@/components/ui/dialog";
 import SourceIcon from "@/components/ui/source-icon";
 
 export default function SourcesPage() {
+  const router = useRouter();
   const { sources, folders, removeSource, moveSourceToFolder } = useFeedStore();
   const [showAddFeed, setShowAddFeed] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
@@ -96,23 +98,31 @@ export default function SourcesPage() {
               className="group flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors animate-feed-item"
               style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
             >
-              <SourceIcon
-                siteUrl={source.siteUrl}
-                imageUrl={source.imageUrl}
-                size={36}
-                className="rounded-lg"
-              />
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(`/feeds?source=${encodeURIComponent(source.id)}`)
+                }
+                className="flex flex-1 min-w-0 items-center gap-4 text-left cursor-pointer"
+              >
+                <SourceIcon
+                  siteUrl={source.siteUrl}
+                  imageUrl={source.imageUrl}
+                  size={36}
+                  className="rounded-lg"
+                />
 
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-neutral-100 truncate">
-                  {source.title}
-                </h3>
-                <div className="flex items-center gap-2 mt-0.5 justify-between flex-wrap">
-                  <span className="text-xs text-gray-400 dark:text-neutral-500 truncate w-auto">
-                    {source.url}
-                  </span>
+                <div className="min-w-0">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-neutral-100 truncate">
+                    {source.title}
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5 justify-between flex-wrap">
+                    <span className="text-xs text-gray-400 dark:text-neutral-500 truncate w-auto">
+                      {source.url}
+                    </span>
+                  </div>
                 </div>
-              </div>
+              </button>
 
               <div className="flex items-center gap-1 shrink-0">
                 <select
