@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { X, AlertCircle, CheckCircle2, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,13 +27,8 @@ const iconColorMap: Record<ToastType, string> = {
 
 export default function ToastContainer() {
   const { toasts, removeToast } = useToastStore();
-  const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || toasts.length === 0) return null;
+  if (typeof document === "undefined" || toasts.length === 0) return null;
 
   return createPortal(
     <div
