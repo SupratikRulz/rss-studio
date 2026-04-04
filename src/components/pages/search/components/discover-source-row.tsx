@@ -97,12 +97,12 @@ export default function DiscoverSourceRow({
             ) : isSubscribed ? (
               <span className="flex items-center gap-1">
                 <Check size={12} />
-                Added
+                <span className="hidden sm:inline">Added</span>
               </span>
             ) : (
               <span className="flex items-center gap-1">
                 <Plus size={12} />
-                Follow
+                <span className="hidden sm:inline">Follow</span>
               </span>
             )}
           </button>
