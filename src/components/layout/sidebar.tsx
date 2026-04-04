@@ -64,8 +64,7 @@ export default function Sidebar() {
   const searchParams = useSearchParams();
   const [feedsExpanded, setFeedsExpanded] = useState(true);
   const [sourcesExpanded, setSourcesExpanded] = useState(true);
-  const { fetchSourceFeed, selectedSourceId, addFolder, removeFolder } =
-    useFeedStore();
+  const { selectedSourceId, addFolder, removeFolder } = useFeedStore();
 
   const [showAddFolder, setShowAddFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
@@ -81,7 +80,6 @@ export default function Sidebar() {
     pathname.startsWith("/sources") || pathname.startsWith("/search");
 
   function handleSourceSelect(sourceId: string) {
-    fetchSourceFeed(sourceId);
     router.push(`/feeds?source=${encodeURIComponent(sourceId)}`);
   }
 

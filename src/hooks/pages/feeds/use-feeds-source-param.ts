@@ -58,13 +58,15 @@ export default function useFeedsSourceParam({
 
   useEffect(() => {
     if (
-      selectedSourceId &&
+      sourceParam &&
+      selectedSourceId === sourceParam &&
       sourceFeedItems.length === 0 &&
       !isLoadingSourceFeed
     ) {
-      fetchSourceFeed(selectedSourceId);
+      fetchSourceFeed(sourceParam);
     }
   }, [
+    sourceParam,
     selectedSourceId,
     sourceFeedItems.length,
     isLoadingSourceFeed,
@@ -107,9 +109,8 @@ export default function useFeedsSourceParam({
   const handleSourceSelect = useCallback(
     (sourceId: string) => {
       replaceSourceParam(sourceId);
-      fetchSourceFeed(sourceId);
     },
-    [fetchSourceFeed, replaceSourceParam]
+    [replaceSourceParam]
   );
 
   const handleMobileBack = useCallback(() => {

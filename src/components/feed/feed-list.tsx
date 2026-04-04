@@ -14,6 +14,7 @@ interface FeedListProps {
   isLoading: boolean;
   emptyMessage?: string;
   emptyDescription?: string;
+  animateItems?: boolean;
 }
 
 export default function FeedList({
@@ -21,6 +22,7 @@ export default function FeedList({
   isLoading,
   emptyMessage = "No articles yet",
   emptyDescription = "Articles will appear here once feeds are loaded.",
+  animateItems = true,
 }: FeedListProps) {
   const feedView = useSettingsStore((s) => s.feedView);
 
@@ -31,6 +33,7 @@ export default function FeedList({
         isLoading={isLoading}
         emptyMessage={emptyMessage}
         emptyDescription={emptyDescription}
+        animateItems={animateItems}
       />
     );
   }
@@ -42,6 +45,7 @@ export default function FeedList({
         isLoading={isLoading}
         emptyMessage={emptyMessage}
         emptyDescription={emptyDescription}
+        animateItems={animateItems}
       />
     );
   }
@@ -53,6 +57,7 @@ export default function FeedList({
         isLoading={isLoading}
         emptyMessage={emptyMessage}
         emptyDescription={emptyDescription}
+        animateItems={animateItems}
       />
     );
   }
@@ -77,8 +82,12 @@ export default function FeedList({
       {items.map((item, i) => (
         <div
           key={item.id}
-          className="animate-feed-item"
-          style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
+          className={animateItems ? "animate-feed-item" : undefined}
+          style={
+            animateItems
+              ? { animationDelay: `${Math.min(i * 30, 300)}ms` }
+              : undefined
+          }
         >
           <FeedCard item={item} />
         </div>

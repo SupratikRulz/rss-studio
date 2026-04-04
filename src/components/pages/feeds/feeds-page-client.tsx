@@ -42,7 +42,8 @@ export default function FeedsPageClient() {
       setSelectedSourceId,
     });
 
-  const selectedSource = sources.find((source) => source.id === selectedSourceId);
+  const activeSourceId = searchParams.get("source") || selectedSourceId;
+  const selectedSource = sources.find((source) => source.id === activeSourceId);
   const hasFeeds = sources.length > 0 || folders.length > 1;
 
   function handleAddFolder(event: React.FormEvent) {
@@ -70,20 +71,20 @@ export default function FeedsPageClient() {
       {!mobileShowArticles ? (
         <FeedsMobileTree
           hasFeeds={hasFeeds}
-          selectedSourceId={selectedSourceId}
+          selectedSourceId={activeSourceId}
           onShowAddFolder={() => setShowAddFolder(true)}
           onSourceSelect={handleSourceSelect}
           onDeleteFolder={setDeleteTarget}
         />
       ) : (
         <FeedsMobileArticles
-          selectedSourceId={selectedSourceId}
+          selectedSourceId={activeSourceId}
           selectedSource={selectedSource}
           folders={folders}
           items={sourceFeedItems}
           isLoadingSourceFeed={isLoadingSourceFeed}
           onBack={handleMobileBack}
-          onRefresh={() => selectedSourceId && fetchSourceFeed(selectedSourceId, true)}
+          onRefresh={() => activeSourceId && fetchSourceFeed(activeSourceId, true)}
           onMoveToFolder={(folderId) =>
             selectedSource && moveSourceToFolder(selectedSource.id, folderId)
           }

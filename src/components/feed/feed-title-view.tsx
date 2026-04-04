@@ -13,6 +13,7 @@ interface FeedTitleViewProps {
   isLoading: boolean;
   emptyMessage?: string;
   emptyDescription?: string;
+  animateItems?: boolean;
 }
 
 export default function FeedTitleView({
@@ -20,6 +21,7 @@ export default function FeedTitleView({
   isLoading,
   emptyMessage = "No articles yet",
   emptyDescription = "Articles will appear here once feeds are loaded.",
+  animateItems = true,
 }: FeedTitleViewProps) {
   if (isLoading) return <TitleViewSkeleton />;
 
@@ -38,8 +40,12 @@ export default function FeedTitleView({
       {items.map((item, i) => (
         <div
           key={item.id}
-          className="animate-feed-item"
-          style={{ animationDelay: `${Math.min(i * 20, 200)}ms` }}
+          className={animateItems ? "animate-feed-item" : undefined}
+          style={
+            animateItems
+              ? { animationDelay: `${Math.min(i * 20, 200)}ms` }
+              : undefined
+          }
         >
           <TitleItem item={item} />
         </div>
