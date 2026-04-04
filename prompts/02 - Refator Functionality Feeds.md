@@ -1,0 +1,3 @@
+# Refactor Feeds menu Functionality
+
+The feeds menu button should have all the folders inside the menu button as connected tree structure. The folders will contain the feed sources. When the feed sources will be clicked, the all the feeds of that particular source should be shown on the right display. Also figure out the layout for the same in mobile version which should be accessible and easy to use.
