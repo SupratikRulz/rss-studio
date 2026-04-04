@@ -70,7 +70,6 @@ export default function SourceIcon({
       className={cn("rounded object-contain shrink-0 border bg-white", className)}
       loading="lazy"
       fetchPriority="low"
-      unoptimized
       onError={() => {
         if (primarySrc) {
           setUseFallback(true);

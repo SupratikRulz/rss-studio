@@ -114,7 +114,7 @@ export default function Sidebar() {
                 </button>
 
                 {sourcesExpanded && (
-                  <div className="mt-1 ml-4 space-y-0.5">
+                  <div className="mt-1 ml-4 space-y-0.5 animate-expand">
                     <Link
                       href="/search"
                       className={cn(
@@ -169,7 +169,7 @@ export default function Sidebar() {
                 </button>
 
                 {feedsExpanded && (
-                  <div className="mt-1 ml-2 pl-2">
+                  <div className="mt-1 ml-2 pl-2 animate-expand">
                     <FeedTree
                       onSourceSelect={handleSourceSelect}
                       selectedSourceId={pathname.startsWith("/feeds") ? selectedSourceId : null}
@@ -250,7 +250,7 @@ export default function Sidebar() {
           </div>
           <button
             type="submit"
-            className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors cursor-pointer"
+            className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 transition-colors cursor-pointer press-scale"
           >
             Create Folder
           </button>

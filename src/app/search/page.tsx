@@ -270,7 +270,7 @@ export default function SearchPage() {
   // Category detail view
   if (selectedCategory) {
     return (
-      <div className="max-w-3xl mx-auto pb-12 lg:pb-0">
+      <div className="max-w-3xl mx-auto pb-12 lg:pb-0 animate-page">
         <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
           <div className="px-4 sm:px-6 py-4 flex items-center gap-3">
             <button
@@ -286,14 +286,15 @@ export default function SearchPage() {
         </header>
 
         <div className="px-4 sm:px-6 space-y-3">
-          {selectedCategory.sources.map((source) => {
+          {selectedCategory.sources.map((source, i) => {
             const subscribed = isSubscribed(source.url);
             const loading = subscribingUrl === source.url;
 
             return (
               <div
                 key={source.url}
-                className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-colors"
+                className="flex items-center gap-4 p-4 rounded-xl border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-200 hover:-translate-y-0.5 animate-feed-item"
+                style={{ animationDelay: `${Math.min(i * 40, 300)}ms` }}
               >
                 <SourceIcon
                   siteUrl={source.siteUrl}
@@ -321,7 +322,7 @@ export default function SearchPage() {
                     onClick={() => handleFollowSource(source)}
                     disabled={subscribed || loading}
                     className={cn(
-                      "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer",
+                      "rounded-lg px-3 py-1.5 text-xs font-medium transition-colors cursor-pointer press-scale",
                       subscribed
                         ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
                         : "bg-emerald-600 text-white hover:bg-emerald-700 disabled:opacity-50"
@@ -367,7 +368,7 @@ export default function SearchPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto pb-12 lg:pb-0">
+    <div className="max-w-3xl mx-auto pb-12 lg:pb-0 animate-page">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-4">
           <form onSubmit={handleSearch} className="relative">
@@ -400,7 +401,7 @@ export default function SearchPage() {
             <h2 className="text-sm font-semibold text-gray-900 dark:text-neutral-100 uppercase tracking-wide mb-4">
               Discovered Feed
             </h2>
-            <div className="rounded-xl border border-gray-100 dark:border-neutral-800 p-5">
+            <div className="rounded-xl border border-gray-100 dark:border-neutral-800 p-5 animate-feed-item">
               <div className="flex items-center gap-4 mb-4">
                 <div className="w-12 h-12 rounded-lg bg-emerald-100 dark:bg-emerald-900/30 flex items-center justify-center shrink-0">
                   <Rss
@@ -425,7 +426,7 @@ export default function SearchPage() {
                   onClick={() => handleFollowFeed(searchResult.feed!)}
                   disabled={isSubscribed(searchResult.feed!.feedUrl)}
                   className={cn(
-                    "rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer shrink-0",
+                    "rounded-lg px-4 py-2 text-sm font-medium transition-colors cursor-pointer shrink-0 press-scale",
                     isSubscribed(searchResult.feed!.feedUrl)
                       ? "bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400"
                       : "bg-emerald-600 text-white hover:bg-emerald-700"
@@ -475,12 +476,13 @@ export default function SearchPage() {
                 Search Results
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {searchResult.categories.map((cat) => (
-                  <CategoryCard
-                    key={cat.id}
-                    category={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                  />
+                {searchResult.categories.map((cat, i) => (
+                  <div key={cat.id} className="animate-feed-item" style={{ animationDelay: `${Math.min(i * 40, 300)}ms` }}>
+                    <CategoryCard
+                      category={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -508,12 +510,13 @@ export default function SearchPage() {
                 {section.title}
               </h2>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-                {section.categories.map((cat) => (
-                  <CategoryCard
-                    key={cat.id}
-                    category={cat}
-                    onClick={() => setSelectedCategory(cat)}
-                  />
+                {section.categories.map((cat, i) => (
+                  <div key={cat.id} className="animate-feed-item" style={{ animationDelay: `${Math.min(i * 40, 300)}ms` }}>
+                    <CategoryCard
+                      category={cat}
+                      onClick={() => setSelectedCategory(cat)}
+                    />
+                  </div>
                 ))}
               </div>
             </div>
@@ -667,7 +670,7 @@ function CategoryCard({
   return (
     <button
       onClick={onClick}
-      className="text-left rounded-xl border border-gray-100 dark:border-neutral-800 p-4 hover:border-gray-200 dark:hover:border-neutral-700 hover:bg-gray-50/50 dark:hover:bg-neutral-900/50 transition-all cursor-pointer group"
+      className="text-left rounded-xl border border-gray-100 dark:border-neutral-800 p-4 hover:border-gray-200 dark:hover:border-neutral-700 hover:bg-gray-50/50 dark:hover:bg-neutral-900/50 transition-all duration-200 hover:-translate-y-0.5 cursor-pointer group w-full"
     >
       <h3 className="text-sm font-semibold text-gray-900 dark:text-neutral-100 mb-3 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
         {category.name}

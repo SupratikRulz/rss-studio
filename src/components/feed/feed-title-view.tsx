@@ -36,8 +36,14 @@ export default function FeedTitleView({
 
   return (
     <div className="divide-y divide-gray-100 dark:divide-neutral-800">
-      {items.map((item) => (
-        <TitleItem key={item.id} item={item} />
+      {items.map((item, i) => (
+        <div
+          key={item.id}
+          className="animate-feed-item"
+          style={{ animationDelay: `${Math.min(i * 20, 200)}ms` }}
+        >
+          <TitleItem item={item} />
+        </div>
       ))}
     </div>
   );

@@ -5,6 +5,8 @@
 :root {
   --background: #ffffff;
   --foreground: #111827;
+  --ease-out-quint: cubic-bezier(0.23, 1, 0.32, 1);
+  --ease-out-cubic: cubic-bezier(0.215, 0.61, 0.355, 1);
 }
 
 [data-theme="dark"] {
@@ -28,14 +30,15 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Dialog / modal entrance */
 .animate-in {
-  animation: animate-in 0.2s ease-out;
+  animation: animate-in 200ms var(--ease-out-quint);
 }
 
 @keyframes animate-in {
   from {
     opacity: 0;
-    transform: scale(0.96) translateY(4px);
+    transform: scale(0.96) translateY(6px);
   }
   to {
     opacity: 1;
@@ -43,18 +46,107 @@ body {
   }
 }
 
+/* Dialog overlay fade */
+.animate-overlay {
+  animation: overlay-in 200ms var(--ease-out-cubic);
+}
+
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Toast slide-in */
 .animate-slide-in-toast {
-  animation: slide-in-toast 0.3s ease-out;
+  animation: slide-in-toast 250ms var(--ease-out-quint);
 }
 
 @keyframes slide-in-toast {
   from {
     opacity: 0;
-    transform: translateY(-12px);
+    transform: translateY(-10px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* Feed item staggered entrance */
+.animate-feed-item {
+  animation: feed-item-in 250ms var(--ease-out-cubic) both;
+}
+
+@keyframes feed-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Page content fade-in */
+.animate-page {
+  animation: page-in 250ms var(--ease-out-cubic);
+}
+
+@keyframes page-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Sidebar sub-menu expand */
+.animate-expand {
+  animation: expand-in 200ms var(--ease-out-cubic);
+  overflow: hidden;
+}
+
+@keyframes expand-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Button press feedback — only on pointer devices */
+@media (hover: hover) and (pointer: fine) {
+  .press-scale:active {
+    transform: scale(0.97);
+    transition: transform 100ms var(--ease-out-cubic);
+  }
+}
+
+/* Bookmark pop */
+.animate-bookmark {
+  animation: bookmark-pop 200ms var(--ease-out-quint);
+}
+
+@keyframes bookmark-pop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+/* Reduced motion: disable all custom animations */
+@media (prefers-reduced-motion: reduce) {
+  .animate-in,
+  .animate-overlay,
+  .animate-slide-in-toast,
+  .animate-feed-item,
+  .animate-page,
+  .animate-expand,
+  .animate-bookmark {
+    animation: none;
+  }
+  .press-scale:active {
+    transform: none;
   }
 }
 

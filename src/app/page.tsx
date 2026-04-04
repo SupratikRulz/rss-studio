@@ -58,7 +58,7 @@ export default function TodayPage() {
   const isLoading = activeTab === "me" ? isLoadingFeeds : isLoadingExplore;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto animate-page">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 pt-5 pb-0">
           <div className="flex items-center justify-between mb-4">

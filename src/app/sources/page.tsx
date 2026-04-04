@@ -27,7 +27,7 @@ export default function SourcesPage() {
   }, [sources, searchQuery]);
 
   return (
-    <div className="max-w-3xl mx-auto pb-12 lg:pb-0">
+    <div className="max-w-3xl mx-auto pb-12 lg:pb-0 animate-page">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-5 flex items-center justify-between">
           <h1 className="text-xl font-semibold text-gray-900 dark:text-neutral-100">
@@ -35,7 +35,7 @@ export default function SourcesPage() {
           </h1>
           <button
             onClick={() => setShowAddFeed(true)}
-            className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors cursor-pointer"
+            className="flex items-center gap-2 rounded-lg bg-emerald-600 px-3.5 py-2 text-sm font-medium text-white hover:bg-emerald-700 transition-colors cursor-pointer press-scale"
           >
             <Plus size={16} />
             Add Feed
@@ -46,20 +46,20 @@ export default function SourcesPage() {
           <div className="px-4 sm:px-6 pb-4">
             <div className="relative">
               <Search
-                size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500 pointer-events-none"
+                size={18}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500 pointer-events-none"
               />
               <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search your sources..."
-                className="w-full rounded-lg border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900 pl-9 pr-8 py-2 text-sm text-gray-900 dark:text-neutral-100 placeholder:text-gray-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
+                className="w-full rounded-xl border border-gray-200 dark:border-neutral-700 bg-gray-50 dark:bg-neutral-900 pl-10 pr-8 py-3 text-sm text-gray-900 dark:text-neutral-100 placeholder:text-gray-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 transition-colors"
               />
               {searchQuery && (
                 <button
                   onClick={() => setSearchQuery("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 cursor-pointer"
+                  className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 dark:text-neutral-500 hover:text-gray-600 dark:hover:text-neutral-300 cursor-pointer"
                 >
                   <X size={14} />
                 </button>
@@ -90,10 +90,11 @@ export default function SourcesPage() {
         </div>
       ) : (
         <div className="divide-y divide-gray-100 dark:divide-neutral-800 px-2 sm:px-4">
-          {filteredSources.map((source) => (
+          {filteredSources.map((source, i) => (
             <div
               key={source.id}
-              className="group flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors"
+              className="group flex items-center gap-4 p-4 rounded-xl hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors animate-feed-item"
+              style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
             >
               <SourceIcon
                 siteUrl={source.siteUrl}

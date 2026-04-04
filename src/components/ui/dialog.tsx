@@ -50,14 +50,14 @@ export default function Dialog({
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 p-4"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 dark:bg-black/60 p-4 animate-overlay"
       onClick={(e) => {
         if (e.target === overlayRef.current) onClose();
       }}
     >
       <div
         className={cn(
-          "w-full max-w-md rounded-xl bg-white dark:bg-neutral-900 shadow-xl animate-in",
+          "w-full max-w-md rounded-xl bg-white dark:bg-neutral-900 shadow-xl animate-in will-change-transform",
           className
         )}
         role="dialog"

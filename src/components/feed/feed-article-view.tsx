@@ -37,8 +37,14 @@ export default function FeedArticleView({
 
   return (
     <div className="divide-y divide-gray-100 dark:divide-neutral-800">
-      {items.map((item) => (
-        <ArticleItem key={item.id} item={item} />
+      {items.map((item, i) => (
+        <div
+          key={item.id}
+          className="animate-feed-item"
+          style={{ animationDelay: `${Math.min(i * 30, 300)}ms` }}
+        >
+          <ArticleItem item={item} />
+        </div>
       ))}
     </div>
   );

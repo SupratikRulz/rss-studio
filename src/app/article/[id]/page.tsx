@@ -6,7 +6,7 @@ import useFeedStore from "@/stores/feed-store";
 import BookmarkButton from "@/components/feed/bookmark-button";
 import OptimizedImage from "@/components/ui/optimized-image";
 import ShareButtons from "@/components/feed/share-buttons";
-import { formatDate } from "@/lib/utils";
+import { formatDate, proxyArticleImages } from "@/lib/utils";
 
 export default function ArticlePage() {
   const router = useRouter();
@@ -29,7 +29,7 @@ export default function ArticlePage() {
   const article = selectedArticle;
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto animate-page">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
           <button
@@ -102,7 +102,7 @@ export default function ArticlePage() {
             prose-strong:text-gray-800
             prose-blockquote:border-emerald-200 prose-blockquote:text-gray-500"
           dangerouslySetInnerHTML={{
-            __html: article.content || article.description || "",
+            __html: proxyArticleImages(article.content || article.description || ""),
           }}
         />
 

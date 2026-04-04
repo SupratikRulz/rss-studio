@@ -192,7 +192,7 @@ export default function AddFeedDialog({ open, onClose }: AddFeedDialogProps) {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center justify-center gap-2"
+          className="w-full rounded-lg bg-emerald-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer transition-colors flex items-center justify-center gap-2 press-scale"
         >
           {isLoading ? (
             <>

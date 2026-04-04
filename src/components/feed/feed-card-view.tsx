@@ -36,8 +36,14 @@ export default function FeedCardView({
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-2">
-      {items.map((item) => (
-        <CardItem key={item.id} item={item} />
+      {items.map((item, i) => (
+        <div
+          key={item.id}
+          className="animate-feed-item"
+          style={{ animationDelay: `${Math.min(i * 40, 300)}ms` }}
+        >
+          <CardItem item={item} />
+        </div>
       ))}
     </div>
   );
@@ -56,7 +62,7 @@ function CardItem({ item }: { item: FeedItem }) {
   return (
     <article
       onClick={handleClick}
-      className="group flex flex-col rounded-xl overflow-hidden cursor-pointer border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-all hover:shadow-sm"
+      className="group flex flex-col rounded-xl overflow-hidden cursor-pointer border border-gray-100 dark:border-neutral-800 hover:border-gray-200 dark:hover:border-neutral-700 transition-all duration-200 hover:shadow-sm hover:-translate-y-0.5"
     >
       {item.imageUrl && (
         <div className="w-full aspect-16/10 bg-gray-100 dark:bg-neutral-800 overflow-hidden relative">

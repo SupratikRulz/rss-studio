@@ -71,3 +71,15 @@ export function isToday(dateString: string): boolean {
 export function cn(...classes: (string | boolean | undefined | null)[]): string {
   return classes.filter(Boolean).join(" ");
 }
+
+export function proxyArticleImages(html: string, width = 768, quality = 75): string {
+  if (!html) return "";
+  return html.replace(
+    /<img([^>]+)src=["']([^"']+)["']/gi,
+    (match, before, src) => {
+      if (src.startsWith("data:") || src.startsWith("/_next/")) return match;
+      const proxied = `/_next/image?url=${encodeURIComponent(src)}&w=${width}&q=${quality}`;
+      return `<img${before}src="${proxied}" loading="lazy"`;
+    }
+  );
+}

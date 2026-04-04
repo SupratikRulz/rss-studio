@@ -42,8 +42,6 @@ export default function OptimizedImage({
     return <div className={cn("bg-gray-100 dark:bg-neutral-800", containerClassName)} />;
   }
 
-  const isAbsolute = src.startsWith("http://") || src.startsWith("https://");
-
   const commonProps = {
     src,
     alt,
@@ -55,7 +53,7 @@ export default function OptimizedImage({
       setFailed(true);
       onError?.();
     },
-    unoptimized: !isAbsolute ? false : undefined,
+    unoptimized: false,
   };
 
   if (fill) {

@@ -76,7 +76,7 @@ export default function FeedsPage() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-3xl mx-auto animate-page">
       {/* ── Mobile: tree view ────────────────────────────────── */}
       <div className={mobileShowArticles ? "hidden" : "lg:hidden"}>
         <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
