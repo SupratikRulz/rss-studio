@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { Bookmark, FeedItem } from "@/lib/types";
 import { generateId } from "@/lib/utils";
+import { createUserStorage } from "@/lib/user-storage";
 
 interface BookmarkState {
   bookmarks: Bookmark[];
@@ -42,6 +43,8 @@ const useBookmarkStore = create<BookmarkState>()(
     }),
     {
       name: "rss-studio-bookmarks",
+      storage: createUserStorage(),
+      skipHydration: true,
     }
   )
 );

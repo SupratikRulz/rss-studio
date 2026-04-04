@@ -3,6 +3,7 @@ import { persist } from "zustand/middleware";
 import type { FeedSource, Folder, FeedItem } from "@/lib/types";
 import { DEFAULT_FOLDER_ID, DEFAULT_FOLDER_NAME } from "@/lib/constants";
 import { generateId } from "@/lib/utils";
+import { createUserStorage } from "@/lib/user-storage";
 import useToastStore from "./toast-store";
 
 const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
@@ -285,6 +286,8 @@ const useFeedStore = create<FeedState>()(
     }),
     {
       name: "rss-studio-feeds",
+      storage: createUserStorage(),
+      skipHydration: true,
       partialize: (state) => ({
         sources: state.sources,
         folders: state.folders,

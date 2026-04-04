@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { createUserStorage } from "@/lib/user-storage";
 
 export type Theme = "light" | "dark" | "system";
 export type FeedView = "magazine" | "cards" | "article" | "titleOnly";
@@ -24,7 +25,11 @@ const useSettingsStore = create<SettingsState>()(
         set({ readingFontSize: Math.min(48, Math.max(12, readingFontSize)) }),
       setFeedView: (feedView) => set({ feedView }),
     }),
-    { name: "rss-studio-settings" }
+    {
+      name: "rss-studio-settings",
+      storage: createUserStorage(),
+      skipHydration: true,
+    }
   )
 );
 
