@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useMemo, Suspense, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Tabs from "@/components/ui/tabs";
 import FeedList from "@/components/feed/feed-list";
 import useFeedStore from "@/stores/feed-store";
@@ -13,8 +14,12 @@ const TABS = [
   { id: "explore", label: "Explore" },
 ];
 
-export default function TodayPage() {
-  const [activeTab, setActiveTab] = useState("me");
+function TodayPageContent() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab");
+  const activeTab = tabParam === "explore" ? "explore" : "me";
+
   const [showAddFeed, setShowAddFeed] = useState(false);
 
   const {
@@ -36,6 +41,14 @@ export default function TodayPage() {
       fetchExploreFeeds();
     }
   }, [activeTab, fetchExploreFeeds]);
+
+  function setActiveTab(tabId: string) {
+    if (tabId === "explore") {
+      router.replace("/?tab=explore", { scroll: false });
+    } else {
+      router.replace("/", { scroll: false });
+    }
+  }
 
   const todayFeedItems = useMemo(
     () => feedItems.filter((item) => isToday(item.pubDate)),
@@ -118,5 +131,26 @@ export default function TodayPage() {
 
       <AddFeedDialog open={showAddFeed} onClose={() => setShowAddFeed(false)} />
     </div>
+  );
+}
+
+function TodayPageFallback() {
+  return (
+    <div className="max-w-3xl mx-auto animate-page min-h-[40vh]">
+      <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
+        <div className="px-4 sm:px-6 pt-5 pb-0">
+          <div className="h-7 w-28 bg-gray-200 dark:bg-neutral-800 rounded-md animate-pulse mb-4" />
+          <div className="h-11 bg-gray-100 dark:bg-neutral-900 rounded-lg animate-pulse mb-2" />
+        </div>
+      </header>
+    </div>
+  );
+}
+
+export default function TodayPage() {
+  return (
+    <Suspense fallback={<TodayPageFallback />}>
+      <TodayPageContent />
+    </Suspense>
   );
 }
