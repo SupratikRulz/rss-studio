@@ -59,29 +59,46 @@ function TitleItem({ item }: { item: FeedItem }) {
   const description = stripHtml(item.description || item.content);
 
   return (
-    <div className="flex items-center gap-3 py-2.5 px-2 group hover:bg-gray-50 dark:hover:bg-neutral-900 rounded-lg transition-colors">
+    <div className="group flex items-center gap-3 rounded-lg px-2 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-neutral-900">
       <BookmarkButton item={item} size={15} className="shrink-0" />
 
-      <div
-        onClick={() => navigate(item)}
-        className="flex-1 min-w-0 flex items-center gap-2 cursor-pointer"
-      >
-        <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 shrink-0 w-20 truncate">
-          {item.sourceName}
-        </span>
-        <span ref={titleRef as React.Ref<HTMLSpanElement>} className="text-sm font-medium text-gray-900 dark:text-neutral-100 truncate group-hover:text-emerald-700 dark:group-hover:text-emerald-400 transition-colors">
-          {item.title}
-        </span>
-        {description && (
-          <span className="hidden lg:inline text-xs text-gray-400 dark:text-neutral-500 truncate">
-            {truncate(description, 80)}
+      <div className="relative flex min-w-0 flex-1 items-center">
+        <div
+          onClick={() => navigate(item)}
+          className="flex min-w-0 flex-1 items-center gap-2 cursor-pointer"
+        >
+          <span className="w-20 shrink-0 truncate text-xs font-medium text-emerald-600 dark:text-emerald-400">
+            {item.sourceName}
           </span>
-        )}
+          <span
+            ref={titleRef as React.Ref<HTMLSpanElement>}
+            className="max-w-full shrink truncate text-sm font-medium text-gray-900 transition-colors group-hover:text-emerald-700 dark:text-neutral-100 dark:group-hover:text-emerald-400 lg:max-w-[40%]"
+          >
+            {item.title}
+          </span>
+          {description && (
+            <span className="hidden min-w-0 flex-1 truncate text-xs text-gray-400 dark:text-neutral-500 lg:inline">
+              {truncate(description, 120)}
+            </span>
+          )}
+        </div>
+
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 hidden items-center opacity-0 transition-opacity md:flex group-hover:opacity-100">
+          <div className="absolute inset-y-0 -left-16 right-0 bg-linear-to-l from-gray-50 via-gray-50/95 to-transparent dark:from-neutral-900 dark:via-neutral-900/95" />
+          <ShareButtons
+            url={item.link}
+            title={item.title}
+            className="relative pointer-events-auto rounded-lg bg-gray-50/95 dark:bg-neutral-900/95"
+          />
+        </div>
       </div>
 
-      <div className="flex items-center gap-0.5 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        <ShareButtons url={item.link} title={item.title} />
-      </div>
+      <ShareButtons
+        url={item.link}
+        title={item.title}
+        variant="native"
+        className="shrink-0 md:hidden"
+      />
 
       <span className="text-xs text-gray-400 dark:text-neutral-500 whitespace-nowrap shrink-0">
         {formatDate(item.pubDate)}

@@ -30,7 +30,7 @@ export default function SourcesPage() {
   }, [sources, searchQuery]);
 
   return (
-    <div className="max-w-3xl mx-auto pb-12 lg:pb-0 animate-page">
+    <div className="max-w-7xl mx-auto pb-12 lg:pb-0 animate-page">
       <SourcesPageHeader
         hasSources={sources.length > 0}
         searchQuery={searchQuery}

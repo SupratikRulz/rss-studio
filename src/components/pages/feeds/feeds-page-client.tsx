@@ -67,7 +67,7 @@ export default function FeedsPageClient() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto animate-page">
+    <div className="max-w-7xl mx-auto animate-page">
       {!mobileShowArticles ? (
         <FeedsMobileTree
           hasFeeds={hasFeeds}

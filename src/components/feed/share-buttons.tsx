@@ -1,6 +1,8 @@
 "use client";
 
 import { Mail, Share2 } from "lucide-react";
+import { cn } from "@/lib/utils";
+import useToastStore from "@/stores/toast-store";
 
 function FacebookIcon({ size = 17 }: { size?: number }) {
   return (
@@ -22,6 +24,8 @@ function XIcon({ size = 17 }: { size?: number }) {
 interface ShareButtonsProps {
   url: string;
   title: string;
+  variant?: "full" | "native";
+  className?: string;
 }
 
 const SHARE_ACTIONS = [
@@ -48,19 +52,55 @@ const SHARE_ACTIONS = [
   },
 ];
 
-export default function ShareButtons({ url, title }: ShareButtonsProps) {
+export default function ShareButtons({
+  url,
+  title,
+  variant = "full",
+  className,
+}: ShareButtonsProps) {
   async function handleNativeShare() {
     if (typeof navigator !== "undefined" && navigator.share) {
       try {
         await navigator.share({ title, url });
+        return;
       } catch {
         /* user cancelled */
       }
     }
+
+    if (typeof navigator !== "undefined" && navigator.clipboard?.writeText) {
+      try {
+        await navigator.clipboard.writeText(url);
+        useToastStore.getState().addToast("Link copied to clipboard.", "success");
+        return;
+      } catch {
+        /* clipboard unavailable */
+      }
+    }
+
+    if (typeof window !== "undefined") {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }
+  }
+
+  const nativeShareButton = (
+    <button
+      type="button"
+      onClick={handleNativeShare}
+      className="rounded-lg p-2 text-gray-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
+      title="Share"
+      aria-label="Share article"
+    >
+      <Share2 size={17} strokeWidth={1.8} />
+    </button>
+  );
+
+  if (variant === "native") {
+    return <div className={cn("flex items-center", className)}>{nativeShareButton}</div>;
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className={cn("flex items-center gap-1", className)}>
       {SHARE_ACTIONS.map((action) => {
         const Icon = action.icon;
         return (
@@ -71,18 +111,13 @@ export default function ShareButtons({ url, title }: ShareButtonsProps) {
             rel="noopener noreferrer"
             className="rounded-lg p-2 text-gray-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
             title={action.label}
+            aria-label={action.label}
           >
             <Icon size={17} />
           </a>
         );
       })}
-      <button
-        onClick={handleNativeShare}
-        className="rounded-lg p-2 text-gray-400 dark:text-neutral-500 hover:bg-gray-100 dark:hover:bg-neutral-800 hover:text-gray-600 dark:hover:text-neutral-300 transition-colors cursor-pointer"
-        title="Share"
-      >
-        <Share2 size={17} strokeWidth={1.8} />
-      </button>
+      {nativeShareButton}
     </div>
   );
 }

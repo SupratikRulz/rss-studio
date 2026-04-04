@@ -72,7 +72,7 @@ export default function SearchPageClient() {
   }
 
   return (
-    <div className="max-w-3xl mx-auto pb-12 lg:pb-0 animate-page">
+    <div className="max-w-7xl mx-auto pb-12 lg:pb-0 animate-page">
       <SearchHeader
         query={query}
         isSearching={isSearching}

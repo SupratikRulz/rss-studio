@@ -15,7 +15,7 @@ export default function ArticleView({ article, onBack }: ArticleViewProps) {
   const articleContent = useArticleContent(article);
 
   return (
-    <div className="max-w-3xl mx-auto">
+    <div className="max-w-7xl mx-auto">
       <header className="sticky top-0 z-10 bg-white/95 dark:bg-neutral-950/95 backdrop-blur-sm border-b border-gray-100 dark:border-neutral-800 mb-2">
         <div className="px-4 sm:px-6 py-3 flex items-center justify-between">
           <button

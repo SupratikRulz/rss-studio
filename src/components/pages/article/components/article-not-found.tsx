@@ -6,7 +6,7 @@ export default function ArticleNotFound({
   onGoBack,
 }: ArticleNotFoundProps) {
   return (
-    <div className="max-w-3xl mx-auto flex flex-col items-center justify-center py-20">
+    <div className="max-w-7xl mx-auto flex flex-col items-center justify-center py-20">
       <p className="text-sm text-gray-500 dark:text-neutral-400 mb-4">
         Article not found
       </p>
