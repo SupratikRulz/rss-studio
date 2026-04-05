@@ -21,9 +21,6 @@ export default function SignInPage() {
         <h1 className="text-2xl font-semibold text-gray-900 tracking-tight">
           RSS Studio
         </h1>
-        <p className="text-sm text-gray-500">
-          Sign in to your account
-        </p>
       </div>
       <div className="w-full max-w-100">
         <SignIn />
