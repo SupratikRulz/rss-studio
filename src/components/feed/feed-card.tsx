@@ -21,11 +21,14 @@ export default function FeedCard({ item }: FeedCardProps) {
       className="group flex gap-4 p-4 rounded-xl cursor-pointer hover:bg-gray-50 dark:hover:bg-neutral-900 transition-colors border border-transparent hover:border-gray-100 dark:hover:border-neutral-800"
     >
       {item.imageUrl && (
-        <div ref={imageRef as React.Ref<HTMLDivElement>} className="hidden sm:block flex-shrink-0 w-28 h-20 rounded-lg overflow-hidden bg-gray-100 dark:bg-neutral-800 relative">
+        <div
+          ref={imageRef as React.Ref<HTMLDivElement>}
+          className="relative h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-neutral-800 sm:h-20 sm:w-28"
+        >
           <OptimizedImage
             src={item.imageUrl}
             fill
-            sizes="112px"
+            sizes="(max-width: 640px) 80px, 112px"
             className="object-cover"
             hideContainerOnError
           />
@@ -39,13 +42,13 @@ export default function FeedCard({ item }: FeedCardProps) {
               {item.title}
             </h3>
             <div className="flex items-center gap-2 mt-1.5">
-              <span className="text-xs font-medium text-emerald-600 dark:text-emerald-400 truncate max-w-[140px]">
+              <span className="max-w-35 truncate text-xs font-medium text-emerald-600 dark:text-emerald-400">
                 {item.sourceName}
               </span>
               {item.author && (
                 <>
                   <span className="text-gray-300 dark:text-neutral-600">·</span>
-                  <span className="text-xs text-gray-400 dark:text-neutral-500 truncate max-w-[100px]">
+                  <span className="max-w-25 truncate text-xs text-gray-400 dark:text-neutral-500">
                     {item.author}
                   </span>
                 </>
@@ -56,7 +59,7 @@ export default function FeedCard({ item }: FeedCardProps) {
               </span>
             </div>
           </div>
-          <BookmarkButton item={item} className="flex-shrink-0 -mt-0.5" />
+          <BookmarkButton item={item} className="-mt-0.5 shrink-0" />
         </div>
 
         {description && (

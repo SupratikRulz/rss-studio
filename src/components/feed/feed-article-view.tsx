@@ -2,6 +2,7 @@
 
 import type { FeedItem } from "@/lib/types";
 import { formatDate, stripHtml, truncate } from "@/lib/utils";
+import useSettingsStore from "@/stores/settings-store";
 import BookmarkButton from "./bookmark-button";
 import ShareButtons from "./share-buttons";
 import useArticleTransition from "@/hooks/use-article-transition";
@@ -24,6 +25,8 @@ export default function FeedArticleView({
   emptyDescription = "Articles will appear here once feeds are loaded.",
   animateItems = true,
 }: FeedArticleViewProps) {
+  const readingFontSize = useSettingsStore((state) => state.readingFontSize);
+
   if (isLoading) return <ArticleViewSkeleton />;
 
   if (items.length === 0) {
@@ -48,14 +51,20 @@ export default function FeedArticleView({
               : undefined
           }
         >
-          <ArticleItem item={item} />
+          <ArticleItem item={item} readingFontSize={readingFontSize} />
         </div>
       ))}
     </div>
   );
 }
 
-function ArticleItem({ item }: { item: FeedItem }) {
+function ArticleItem({
+  item,
+  readingFontSize,
+}: {
+  item: FeedItem;
+  readingFontSize: number;
+}) {
   const { navigate, titleRef, imageRef } = useArticleTransition();
   const description = stripHtml(item.description || item.content);
 
@@ -98,7 +107,10 @@ function ArticleItem({ item }: { item: FeedItem }) {
           </div>
         )}
         {description && (
-          <p className="text-gray-600 dark:text-neutral-300 leading-relaxed" style={{ fontSize: "1em" }}>
+          <p
+            className="text-gray-600 dark:text-neutral-300 leading-relaxed"
+            style={{ fontSize: `${readingFontSize}px` }}
+          >
             {truncate(description, 600)}
           </p>
         )}

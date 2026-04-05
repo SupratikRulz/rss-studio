@@ -5,6 +5,7 @@ import BookmarkButton from "@/components/feed/bookmark-button";
 import ShareButtons from "@/components/feed/share-buttons";
 import OptimizedImage from "@/components/ui/optimized-image";
 import useArticleContent from "@/hooks/pages/article/use-article-content";
+import useSettingsStore from "@/stores/settings-store";
 
 interface ArticleViewProps {
   article: FeedItem;
@@ -13,6 +14,7 @@ interface ArticleViewProps {
 
 export default function ArticleView({ article, onBack }: ArticleViewProps) {
   const articleContent = useArticleContent(article);
+  const readingFontSize = useSettingsStore((state) => state.readingFontSize);
 
   return (
     <div className="max-w-7xl mx-auto">
@@ -95,6 +97,7 @@ export default function ArticleView({ article, onBack }: ArticleViewProps) {
             prose-img:rounded-xl prose-img:my-4
             prose-strong:text-gray-800
             prose-blockquote:border-emerald-200 prose-blockquote:text-gray-500"
+          style={{ fontSize: `${readingFontSize}px` }}
           dangerouslySetInnerHTML={{ __html: articleContent }}
         />
 
