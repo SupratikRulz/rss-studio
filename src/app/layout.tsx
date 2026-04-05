@@ -1,9 +1,10 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ThemeProvider from "@/components/layout/theme-provider";
 import { ClerkProvider } from "@/lib/auth";
 import { seoConfig } from "@/lib/seo";
+import { ServiceWorkerRegistrar } from "@/components/pwa/service-worker-registrar";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -15,6 +16,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+export const viewport: Viewport = {
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#059669" },
+    { media: "(prefers-color-scheme: dark)", color: "#0a0a0a" },
+  ],
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   metadataBase: new URL(seoConfig.siteUrl),
   applicationName: seoConfig.siteName,
@@ -25,6 +38,14 @@ export const metadata: Metadata = {
   description: seoConfig.defaultDescription,
   keywords: seoConfig.defaultKeywords,
   category: "technology",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: seoConfig.siteName,
+  },
+  formatDetection: {
+    telephone: false,
+  },
   openGraph: {
     title: seoConfig.defaultTitle,
     description: seoConfig.defaultDescription,
@@ -36,6 +57,15 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: seoConfig.defaultTitle,
     description: seoConfig.defaultDescription,
+  },
+  icons: {
+    icon: [
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: [
+      { url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
   },
 };
 
@@ -59,6 +89,7 @@ export default function RootLayout({
         <ClerkProvider appearance={clerkAppearance}>
           <ThemeProvider>{children}</ThemeProvider>
         </ClerkProvider>
+        <ServiceWorkerRegistrar />
       </body>
     </html>
   );
